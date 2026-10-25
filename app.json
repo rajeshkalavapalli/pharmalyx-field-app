@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Pharmalyx",
+    "slug": "pharmalyx-field-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F3F6F9",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.pharmalyx.field"
+    },
+    "android": {
+      "package": "com.pharmalyx.field",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F766E",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "ACCESS_BACKGROUND_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Pharmalyx uses the camera for the clinic signboard photo and the chemist's order slip.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Pharmalyx uses your location to check you in at the clinic and record your field work.",
+          "locationAlwaysAndWhenInUsePermission": "During work hours Pharmalyx records your location in the background to work out your TA from the distance you travel.",
+          "locationAlwaysPermission": "During work hours Pharmalyx records your location in the background to work out your TA from the distance you travel.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true,
+          "isIosBackgroundLocationEnabled": true
+        }
+      ]
+    ]
+  }
+}
