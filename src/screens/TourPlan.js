@@ -218,7 +218,7 @@ function PlanView({ navigation, userId, month, setMonth }) {
                         {canEdit ? (
                             <View style={[styles.toolbar, { marginTop: space(2) }]}>
                                 <Button title="Save draft" variant="outline" onPress={() => save(false)} busy={busy} style={{ flex: 1 }} />
-                                <Button title="Save & confirm" icon="send" onPress={() => save(true)} busy={busy} style={{ flex: 1 }} />
+                                <Button title={state.data?.owner?.needsApproval ? 'Send for approval' : 'Save & confirm'} icon="send" onPress={() => save(true)} busy={busy} style={{ flex: 1 }} />
                             </View>
                         ) : null}
                         {plan?.canApprove ? (
