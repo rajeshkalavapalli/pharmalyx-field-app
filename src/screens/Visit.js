@@ -140,7 +140,7 @@ export default function Visit({ route, navigation }) {
             )}
             {checkInState.status === 'done' && clinic && clinic.inside === true && <Notice tone="success">{`You are at the clinic (about ${clinic.distanceM} m away).`}</Notice>}
             {checkInState.status === 'done' && clinic && !clinic.pinned && <Notice tone="info">This clinic’s location is not pinned yet, so the visit will need a look.</Notice>}
-            {checkInState.status === 'done' && checkInState.mocked && <Notice tone="error">The phone reports a fake (mock) location. Turn off any location-changing app.</Notice>}
+            {checkInState.status === 'done' && checkInState.mocked && <Notice tone="error">A location-changing app is on. Please turn it off to check in.</Notice>}
 
             <Text style={[text.title, { marginTop: space(1) }]}>How did it go?</Text>
             <View style={styles.feedbackRow}>
