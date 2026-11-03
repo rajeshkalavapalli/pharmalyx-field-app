@@ -34,6 +34,9 @@ const shift = (month, by) => {
 };
 const toPlans = (details = []) =>
     Object.fromEntries(details.map((d) => [String(d.PlanDate).slice(0, 10), { dayType: d.DayType, territory: d.TerritoryId || '', area: d.AreaId || '', territoryName: d.TerritoryName || '', areaName: d.AreaName || '', remarks: d.Remarks || '' }]));
+// Sundays are holidays by default (the server saves an unplanned Sunday as an off day).
+const SUNDAY_OFF = { dayType: OFF, territory: '', area: '', territoryName: '', areaName: '', remarks: 'Sunday' };
+const withSundays = (days, plans) => ({ ...Object.fromEntries(days.filter((d) => weekday(d) === 0).map((d) => [d, SUNDAY_OFF])), ...plans });
 // Same weekday occurrence (2nd Tuesday -> 2nd Tuesday), like the web "copy last month".
 const occurrence = (key) => `${weekday(key)}-${Math.floor((Number(key.slice(8)) - 1) / 7)}`;
 
@@ -112,9 +115,9 @@ function PlanView({ navigation, userId, month, setMonth }) {
     const plan = state.data?.plan;
     const status = plan?.Status || 'NEW';
     const saved = useMemo(() => toPlans(plan?.details), [plan]);
-    const plans = edits || saved;
     const canEdit = !plan || plan.canEdit;
     const days = daysOf(month);
+    const plans = withSundays(days, edits || saved);
     const working = days.filter((d) => plans[d]?.dayType === WORKING).length;
     const planned = days.filter((d) => plans[d]).length;
 
@@ -205,7 +208,7 @@ function PlanView({ navigation, userId, month, setMonth }) {
                                     <Pressable key={d} onPress={() => tap(d)} disabled={!canEdit} style={[styles.day, i > 0 && styles.line, weekday(d) === 0 && { backgroundColor: colors.bg }, on && { backgroundColor: colors.jadeMist }]}>
                                         <Text style={styles.dayLabel}>{dayLabel(d)}</Text>
                                         <Text style={[text.small, { flex: 1, color: p ? colors.ink : colors.inkFaint }]} numberOfLines={1}>
-                                            {!p ? 'Not planned' : p.dayType === OFF ? 'Off / leave' : [titleCase(p.territoryName), titleCase(p.areaName)].filter(Boolean).join(' · ')}
+                                            {!p ? 'Not planned' : p.dayType === OFF ? (p.remarks === 'Sunday' ? 'Sunday · holiday' : 'Off / leave') : [titleCase(p.territoryName), titleCase(p.areaName)].filter(Boolean).join(' · ')}
                                         </Text>
                                         {canEdit ? <Feather name={selecting ? (on ? 'check-square' : 'square') : 'chevron-right'} size={16} color={colors.inkFaint} /> : null}
                                     </Pressable>
