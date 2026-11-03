@@ -189,7 +189,7 @@ const MASTERS = {
         title: 'Users',
         icon: 'user',
         list: '/app/get-users',
-        id: 'UserId',
+        id: 'userId',
         name: nameOfUser,
         caption: (r) => [r.UserName, r.EmailId, r.ManagerName && `reports to ${titleCase(r.ManagerName)}`].filter(Boolean).join(' · '),
         create: (v) => api.post('/app/create-user', v),
@@ -364,7 +364,7 @@ function MasterForm({ kind, row, onBack }) {
                         key={f.key}
                         label={f.label}
                         value={v.ManagerId}
-                        options={[{ value: '', label: 'No manager' }, ...look.users.filter((u) => lower(u.UserId || u.userId) !== lower(row?.UserId)).map((u) => ({ value: String(u.UserId || u.userId), label: nameOfUser(u), detail: u.UserName }))]}
+                        options={[{ value: '', label: 'No manager' }, ...look.users.filter((u) => lower(u.UserId || u.userId) !== lower(row?.userId)).map((u) => ({ value: String(u.UserId || u.userId), label: nameOfUser(u), detail: u.UserName }))]}
                         onChange={(x) => set({ ManagerId: x })}
                         searchable
                     />
