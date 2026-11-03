@@ -8,9 +8,8 @@
       "android": {
         "buildType": "apk"
       },
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://pharmalyx-api-dev.onrender.com"
-      }
+      "environment": "preview",
+      "channel": "preview"
     }
   }
 }
