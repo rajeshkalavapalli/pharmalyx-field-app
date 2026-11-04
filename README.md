@@ -29,3 +29,8 @@
 ### V 1.0.4
 
 - Firebase (FCM) config for Android push: google-services.json (Firebase project pharmalyx-7d46a) linked in app.json `android.googleServicesFile`; it holds public identifiers only
+
+### V 1.0.5
+
+- New app icon: the Pharmalyx "P" (jade gradient, Fraunces), replacing the Expo template icon; Android adaptive icon, themed (monochrome) icon, splash and favicon to match
+- Notification small icon: white "P" (assets/notification-icon.png) tinted jade
