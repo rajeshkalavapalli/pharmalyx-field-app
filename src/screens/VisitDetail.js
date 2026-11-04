@@ -50,7 +50,7 @@ export default function VisitDetail({ navigation, route }) {
                                 {result ? <Tag label={result.label} tone={result.tone} /> : null}
                                 {v.PlanStatus && PLAN_STATUS[v.PlanStatus] ? <Tag label={PLAN_STATUS[v.PlanStatus].label} tone={PLAN_STATUS[v.PlanStatus].tone} /> : null}
                                 {v.Feedback && FEEDBACK[v.Feedback] ? <Tag label={FEEDBACK[v.Feedback].label} tone={FEEDBACK[v.Feedback].tone} /> : null}
-                                {v.IsMockLocation ? <Tag label="Fake GPS" tone="error" /> : null}
+                                {v.IsMockLocation ? <Tag label="Location app" tone="warning" /> : null}
                             </View>
 
                             {(v.reasons || []).length ? (

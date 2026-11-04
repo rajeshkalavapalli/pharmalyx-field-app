@@ -43,7 +43,7 @@ function Review({ userId }) {
                         </Card>
                         {(d.flags || []).length ? (
                             <>
-                                <SectionTitle title="Things to check" caption="Checks lead to a review, not a penalty." />
+                                <SectionTitle title="Things to check" caption="Checks only lead to a quick review." />
                                 {d.flags.map((f) => (
                                     <Notice key={f.FlagId} tone={f.Severity === 'HIGH' ? 'error' : 'warning'} title={titleCase(String(f.FlagType).replace(/_/g, ' '))}>
                                         {typeof f.Details === 'string' ? f.Details : JSON.stringify(f.Details)}

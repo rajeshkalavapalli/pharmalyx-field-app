@@ -14,11 +14,11 @@ import { RESULT } from './MyDay';
 const FLAG_LABEL = {
     DAY_START_OUTSIDE: 'Day started outside territory',
     VISIT_OUTSIDE_TERRITORY: 'Visit outside territory',
-    DRIVE_BY: 'Drive-by check-in',
+    DRIVE_BY: 'Very short visit',
     OUTSIDE_GEOFENCE: 'Away from clinic',
     SAME_SPOT: 'Many clinics, one spot',
-    IMPOSSIBLE_TRAVEL: 'Impossible travel',
-    MOCK_GPS: 'Fake GPS',
+    IMPOSSIBLE_TRAVEL: 'Unusual travel time',
+    MOCK_GPS: 'Location app detected',
     NO_GPS: 'No GPS',
     POB_INFLATED: 'Inflated order quantity',
     POB_FIRST_LARGE: 'Large first order',
@@ -151,7 +151,7 @@ function CoverageTab() {
 
 function FlagsTab({ canDecide }) {
     const [status, setStatus] = useState('OPEN');
-    const state = useLoad(async () => (await api.get('/app/work/flags', { params: { status } })).data, [status], "Couldn't load red flags.");
+    const state = useLoad(async () => (await api.get('/app/work/flags', { params: { status } })).data, [status], "Couldn't load review alerts.");
     const [pending, setPending] = useState(null);
     const act = async (note) => {
         try {
@@ -174,7 +174,7 @@ function FlagsTab({ canDecide }) {
                 value={status}
                 onChange={setStatus}
             />
-            <Text style={[text.small, { marginBottom: space(1.5) }]}>Red flags lead to a review, not a penalty.</Text>
+            <Text style={[text.small, { marginBottom: space(1.5) }]}>Alerts only lead to a quick review.</Text>
             <Loadable state={state}>
                 {(data) =>
                     data.flags.length ? (
@@ -199,7 +199,7 @@ function FlagsTab({ canDecide }) {
                         </View>
                     ) : (
                         <Card>
-                            <Empty icon="flag" title="No red flags here" />
+                            <Empty icon="flag" title="Nothing to review here" />
                         </Card>
                     )
                 }
@@ -426,7 +426,7 @@ export default function VerifiedWork({ navigation }) {
     const tabs = [
         { value: 'visits', label: 'Visits' },
         { value: 'coverage', label: 'Coverage' },
-        { value: 'flags', label: 'Red flags' },
+        { value: 'flags', label: 'Review alerts' },
         { value: 'stock', label: 'Samples' },
         { value: 'boundaries', label: 'Boundaries' },
         { value: 'exceptions', label: 'Exceptions' },

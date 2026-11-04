@@ -15,6 +15,7 @@ export const SECTIONS = [
             { label: 'Visits', icon: 'map-pin', screen: 'Visits', permission: ['visits.view'] },
             { label: 'DCR', icon: 'file-text', screen: 'Dcr', permission: ['dcr.view'] },
             { label: 'Pre-call Planning', icon: 'clipboard', screen: 'PreCall', permission: ['visits.create'] },
+            { label: 'Joint Work', icon: 'users', screen: 'JointWork', permission: ['visits.create', 'visits.view'], badge: 'JointWork' },
             { label: 'Dashboard', icon: 'bar-chart-2', screen: 'Dashboard' },
             { label: 'Attendance', icon: 'clock', screen: 'Attendance', permission: ['attendance.view'] },
             { label: 'Leave', icon: 'sunset', screen: 'Leave', permission: ['leave.view'] },

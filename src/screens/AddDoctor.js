@@ -163,7 +163,7 @@ export default function AddDoctor({ navigation }) {
                 <View style={styles.statusRow}>
                     <Feather name={captured ? 'check-circle' : 'map-pin'} size={16} color={captured ? colors.successDark : colors.warningDark} />
                     <Text style={[text.small, { flex: 1 }]}>
-                        {locating ? 'Finding your location…' : captured ? `Captured (±${Math.round(fix.accuracy || 0)} m)${fix.isMock ? ' · fake GPS detected' : ''}` : fix?.status === 'DENIED' ? 'Location is not allowed. Allow it in phone settings.' : 'Location not found yet.'}
+                        {locating ? 'Finding your location…' : captured ? `Captured (±${Math.round(fix.accuracy || 0)} m)${fix.isMock ? ' · location app detected' : ''}` : fix?.status === 'DENIED' ? 'Location is not allowed. Allow it in phone settings.' : 'Location not found yet.'}
                     </Text>
                     <Button title="Retry" small variant="outline" onPress={locate} disabled={locating} />
                 </View>
