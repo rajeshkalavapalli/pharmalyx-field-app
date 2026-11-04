@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 
 import { api, errorMessage, monthKey } from '../api';
 import { titleCase } from '../format';
+import { usePeople } from '../people';
 import { usePermissions } from '../permissions';
 import { colors, fonts, radius, space, text } from '../theme';
 import { toast } from '../toast';
@@ -32,16 +33,28 @@ const shift = (month, by) => {
     const d = new Date(y, m - 1 + by, 1);
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 };
+const JOINT = 'joint';
 const toPlans = (details = []) =>
-    Object.fromEntries(details.map((d) => [String(d.PlanDate).slice(0, 10), { dayType: d.DayType, territory: d.TerritoryId || '', area: d.AreaId || '', territoryName: d.TerritoryName || '', areaName: d.AreaName || '', remarks: d.Remarks || '' }]));
+    Object.fromEntries(
+        details.map((d) => [
+            String(d.PlanDate).slice(0, 10),
+            { dayType: d.DayType, territory: d.TerritoryId || '', area: d.AreaId || '', territoryName: d.TerritoryName || '', areaName: d.AreaName || '', remarks: d.Remarks || '', jointWith: d.JointWithUserId || '', jointWithName: d.JointWithName || '', jointStatus: d.JointStatus || '' },
+        ])
+    );
 // Sundays are holidays by default (the server saves an unplanned Sunday as an off day).
 const SUNDAY_OFF = { dayType: OFF, territory: '', area: '', territoryName: '', areaName: '', remarks: 'Sunday' };
 const withSundays = (days, plans) => ({ ...Object.fromEntries(days.filter((d) => weekday(d) === 0).map((d) => [d, SUNDAY_OFF])), ...plans });
 // Same weekday occurrence (2nd Tuesday -> 2nd Tuesday), like the web "copy last month".
 const occurrence = (key) => `${weekday(key)}-${Math.floor((Number(key.slice(8)) - 1) / 7)}`;
 
-function DaySheet({ visible, dates, initial, territories, onApply, onClose }) {
-    const [dayType, setDayType] = useState(initial?.dayType || WORKING);
+// team: people below me (joint work with them); lockedBy: a senior planned joint work with me this day;
+// onMove(memberId, date, territoryId, areaId): move a team member's planned day to another area.
+function DaySheet({ visible, dates, initial, territories, team = [], lockedBy = '', onMove, onApply, onClose }) {
+    const [dayType, setDayType] = useState(initial?.jointWith ? JOINT : lockedBy ? WORKING : initial?.dayType || WORKING);
+    const [jointWith, setJointWith] = useState(initial?.jointWith || '');
+    const [moving, setMoving] = useState(false);
+    // A day a senior planned with me: I only fill in the area while it is still empty.
+    const lockedArea = Boolean(lockedBy) && Boolean(initial?.area);
     const [territory, setTerritory] = useState(initial?.territory || '');
     const [area, setArea] = useState(initial?.area || '');
     const [remarks, setRemarks] = useState(initial?.remarks || '');
@@ -58,10 +71,18 @@ function DaySheet({ visible, dates, initial, territories, onApply, onClose }) {
         };
     }, [territory]);
 
-    const ok = dayType === OFF || (territory && area);
+    const isJoint = dayType === JOINT;
+    const showArea = dayType === WORKING || (isJoint && moving);
+    const member = team.find((t) => t.id === jointWith);
+    const canMove = dates.length === 1 && isJoint && jointWith && initial?.jointWith === jointWith && onMove;
+    const ok = isJoint ? Boolean(jointWith) : dayType === OFF || (territory && area);
     const apply = () =>
-        onApply({
+        isJoint
+            ? onApply({ dayType: WORKING, jointWith, jointWithName: member?.name || initial?.jointWithName || '', territory: '', area: '', territoryName: initial?.jointWith === jointWith ? initial.territoryName : '', areaName: initial?.jointWith === jointWith ? initial.areaName : '', remarks: remarks.trim() })
+            : onApply({
             dayType,
+            jointWith: '',
+            jointWithName: '',
             territory: dayType === WORKING ? territory : '',
             area: dayType === WORKING ? area : '',
             territoryName: dayType === WORKING ? territories.find((t) => t.TerritoryId === territory)?.TerritoryName || '' : '',
@@ -80,22 +101,48 @@ function DaySheet({ visible, dates, initial, territories, onApply, onClose }) {
                             <Feather name="x" size={20} color={colors.inkMuted} />
                         </Pressable>
                     </View>
-                    <Chips
-                        options={[
-                            { value: WORKING, label: 'Working' },
-                            { value: OFF, label: 'Off / leave' },
-                        ]}
-                        value={dayType}
-                        onChange={setDayType}
-                    />
-                    {dayType === WORKING && (
+                    {lockedBy ? (
+                        <Notice tone="info" title={`Joint work with ${titleCase(lockedBy)}`}>
+                            {lockedArea ? 'Ask them to change this day.' : "Choose the area you will work in; it can't be an off day."}
+                        </Notice>
+                    ) : (
+                        <Chips
+                            options={[
+                                { value: WORKING, label: 'Working' },
+                                { value: OFF, label: 'Off / leave' },
+                                ...(team.length ? [{ value: JOINT, label: 'Joint work' }] : []),
+                            ]}
+                            value={dayType}
+                            onChange={(v) => {
+                                setDayType(v);
+                                setMoving(false);
+                            }}
+                        />
+                    )}
+                    {isJoint && (
                         <>
-                            <Select label="Territory" value={territory} options={territories.map((t) => ({ value: t.TerritoryId, label: titleCase(t.TerritoryName) }))} onChange={(v) => { setTerritory(v); setArea(''); }} />
-                            <Select label="Area" value={area} options={areas.map((a) => ({ value: a.AreaId, label: titleCase(a.AreaName) }))} onChange={setArea} disabled={!territory} empty="No areas in this territory." />
+                            <Select label="Joint work with" value={jointWith} options={team.map((t) => ({ value: t.id, label: titleCase(t.name), detail: t.detail }))} onChange={(v) => { setJointWith(v); setMoving(false); }} icon="users" />
+                            <Text style={[text.small, { marginBottom: space(1.5) }]}>
+                                {initial?.jointWith === jointWith && initial?.areaName
+                                    ? `Area from their plan: ${[titleCase(initial.territoryName), titleCase(initial.areaName)].filter(Boolean).join(' · ')}`
+                                    : "They work with you that day in their planned area. Their off days, Sundays and leave can't be chosen."}
+                                {initial?.jointWith === jointWith && initial?.jointStatus === 'DECLINED' ? ' Cancelled because of their leave: please replan this day.' : ''}
+                            </Text>
+                            {canMove && !moving ? <Button title={`Change ${titleCase(member?.name || 'their')}'s area`} small variant="outline" onPress={() => setMoving(true)} style={{ marginBottom: space(1.5) }} /> : null}
+                        </>
+                    )}
+                    {showArea && (
+                        <>
+                            <Select label="Territory" value={territory} options={territories.map((t) => ({ value: t.TerritoryId, label: titleCase(t.TerritoryName) }))} onChange={(v) => { setTerritory(v); setArea(''); }} disabled={lockedArea} />
+                            <Select label="Area" value={area} options={areas.map((a) => ({ value: a.AreaId, label: titleCase(a.AreaName) }))} onChange={setArea} disabled={!territory || lockedArea} empty="No areas in this territory." />
                         </>
                     )}
                     <Field label="Note (optional)" value={remarks} onChangeText={(v) => setRemarks(v.slice(0, 200))} autoCapitalize="sentences" />
-                    <Button title="Apply" icon="check" onPress={apply} disabled={!ok} />
+                    {isJoint && moving ? (
+                        <Button title="Move their day" icon="shuffle" onPress={() => onMove(jointWith, dates[0], territory, area)} disabled={!territory || !area} />
+                    ) : lockedArea ? null : (
+                        <Button title="Apply" icon="check" onPress={apply} disabled={!ok} />
+                    )}
                 </View>
             </KeyboardAvoidingView>
         </Modal>
@@ -111,6 +158,10 @@ function PlanView({ navigation, userId, month, setMonth }) {
     const [selected, setSelected] = useState([]);
     const [busy, setBusy] = useState(false);
     const [deciding, setDeciding] = useState(null); // approve | reject
+    const people = usePeople();
+    // People below me, for "joint work with" (my own plan only).
+    const team = userId ? [] : people.users.filter((u) => String(u.UserId).toLowerCase() !== people.meId).map((u) => ({ id: u.UserId, name: u.Name, detail: u.RoleName || undefined }));
+    const locks = state.data?.locks || {};
 
     const plan = state.data?.plan;
     const status = plan?.Status || 'NEW';
@@ -148,7 +199,14 @@ function PlanView({ navigation, userId, month, setMonth }) {
         try {
             const details = Object.entries(plans)
                 .filter(([date]) => date.startsWith(month))
-                .map(([date, p]) => ({ PlanDate: date, DayType: p.dayType, TerritoryId: p.dayType === WORKING ? p.territory || null : null, AreaId: p.dayType === WORKING ? p.area || null : null, Remarks: p.remarks || null }));
+                .map(([date, p]) => ({
+                    PlanDate: date,
+                    DayType: p.dayType,
+                    TerritoryId: p.dayType === WORKING && !p.jointWith ? p.territory || null : null,
+                    AreaId: p.dayType === WORKING && !p.jointWith ? p.area || null : null,
+                    Remarks: p.remarks || null,
+                    ...(p.jointWith ? { JointWithUserId: p.jointWith } : {}),
+                }));
             const r = (await api.post('/app/tourplan', { PlanMonth: `${month}-01`, Submit: submit, details })).data;
             toast(r?.data?.message || r?.message || 'Tour plan saved');
             setEdits(null);
@@ -165,6 +223,18 @@ function PlanView({ navigation, userId, month, setMonth }) {
             const r = (await api.post(`/app/tourplan/${plan.TourPlanId}/${deciding}`, { remarks: remarks || null })).data;
             toast(r?.message || 'Done');
             setDeciding(null);
+            state.reload();
+        } catch (err) {
+            toast(errorMessage(err), 'error');
+        }
+    };
+
+    // Joint work: move a team member's planned day to another area (an approved deviation in their plan).
+    const moveMemberDay = async (memberId, date, territoryId, areaId) => {
+        try {
+            const r = (await api.post(`/app/tourplan/team/${memberId}/day`, { PlanDate: date, TerritoryId: territoryId, AreaId: areaId })).data;
+            toast(r?.message || 'Their day was moved');
+            setPicking(null);
             state.reload();
         } catch (err) {
             toast(errorMessage(err), 'error');
@@ -208,7 +278,13 @@ function PlanView({ navigation, userId, month, setMonth }) {
                                     <Pressable key={d} onPress={() => tap(d)} disabled={!canEdit} style={[styles.day, i > 0 && styles.line, weekday(d) === 0 && { backgroundColor: colors.bg }, on && { backgroundColor: colors.jadeMist }]}>
                                         <Text style={styles.dayLabel}>{dayLabel(d)}</Text>
                                         <Text style={[text.small, { flex: 1, color: p ? colors.ink : colors.inkFaint }]} numberOfLines={1}>
-                                            {!p ? 'Not planned' : p.dayType === OFF ? (p.remarks === 'Sunday' ? 'Sunday · holiday' : 'Off / leave') : [titleCase(p.territoryName), titleCase(p.areaName)].filter(Boolean).join(' · ')}
+                                            {!p
+                                                ? 'Not planned'
+                                                : p.jointWith
+                                                  ? [`With ${titleCase(p.jointWithName)}`, p.jointStatus === 'DECLINED' ? 'on leave: replan' : titleCase(p.areaName) || 'their area'].join(' · ')
+                                                  : p.dayType === OFF
+                                                    ? p.remarks === 'Sunday' ? 'Sunday · holiday' : 'Off / leave'
+                                                    : [locks[d] && `With ${titleCase(locks[d])}`, titleCase(p.territoryName), titleCase(p.areaName)].filter(Boolean).join(' · ')}
                                         </Text>
                                         {canEdit ? <Feather name={selecting ? (on ? 'check-square' : 'square') : 'chevron-right'} size={16} color={colors.inkFaint} /> : null}
                                     </Pressable>
@@ -230,7 +306,19 @@ function PlanView({ navigation, userId, month, setMonth }) {
                     </>
                 )}
             </Loadable>
-            {picking ? <DaySheet visible dates={picking} initial={plans[picking[0]]} territories={territories.data || []} onApply={(v) => setDays(picking, v)} onClose={() => setPicking(null)} /> : null}
+            {picking ? (
+                <DaySheet
+                    visible
+                    dates={picking}
+                    initial={plans[picking[0]]}
+                    territories={territories.data || []}
+                    team={team}
+                    lockedBy={picking.map((d) => locks[d]).find(Boolean) || ''}
+                    onMove={moveMemberDay}
+                    onApply={(v) => setDays(picking, v)}
+                    onClose={() => setPicking(null)}
+                />
+            ) : null}
             <ReasonDialog
                 visible={Boolean(deciding)}
                 title={deciding === 'approve' ? 'Approve this tour plan?' : 'Return for changes?'}

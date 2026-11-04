@@ -9,7 +9,7 @@ import { ago, clock, doctorName, initial, plural, titleCase } from '../format';
 import { getFix, startTrail } from '../location';
 import { colors, fonts, gradients, radius, space, text } from '../theme';
 import { toast } from '../toast';
-import { Button, Card, Empty, ErrorState, ProgressBar, Screen, SectionTitle, Skeleton, SkeletonList, Tag } from '../ui';
+import { Button, Card, Empty, ErrorState, Notice, ProgressBar, Screen, SectionTitle, Skeleton, SkeletonList, Tag } from '../ui';
 
 export const RESULT = {
     VALID: { label: 'Counted', tone: 'success' },
@@ -256,6 +256,14 @@ export default function MyDay({ navigation }) {
                 <>
                     <DayStatus data={data} trail={trail} loadedAt={loadedAt} busy={busy} onAccept={accept} onStart={start} />
                     {error ? <Text style={[text.small, { color: colors.errorDark, marginTop: space(1) }]}>{error} Showing the last loaded data.</Text> : null}
+
+                    {(data.jointWork || []).map((jw) => (
+                        <Notice key={jw.JointWorkId} tone="info" title={`Today: joint work with ${titleCase(jw.withName)}`}>
+                            {`${[jw.TerritoryName && titleCase(jw.TerritoryName), jw.AreaName && titleCase(jw.AreaName)].filter(Boolean).join(' · ') || (jw.role === 'colleague' ? 'Their planned area' : 'Your planned area')}. ${
+                                jw.role === 'field' ? 'Your visits today are marked as joint calls.' : 'Their visits today are your joint calls.'
+                            }`}
+                        </Notice>
+                    ))}
 
                     <View style={styles.quickRow}>
                         <QuickAction icon="user-plus" label="Add doctor" onPress={() => navigation.navigate('AddDoctor')} />

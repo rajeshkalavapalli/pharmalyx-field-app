@@ -109,6 +109,13 @@ export function AttentionProvider({ children }) {
             items.push({ key: `tourplan-${next}`, group: 'Planning', icon: 'calendar', tone: 'info', title: `Plan ${monthName(next)} before ${end}`, caption: 'Your tour plan for next month is not ready yet.', screen: 'TourPlan', params: { month: next } });
         }
 
+        (joint?.replan || []).forEach((r) =>
+            items.push({ key: `replan-${r.JointWorkId}`, group: 'Planning', icon: 'calendar', tone: 'warning', title: `Replan ${r.WorkDate}: ${r.UserName} on leave`, caption: 'Your joint work day with them was cancelled. Choose another day or team member in your tour plan.', screen: 'TourPlan' })
+        );
+        (joint?.upcoming || []).forEach((r) =>
+            items.push({ key: `upcoming-${r.JointWorkId}`, group: 'Your day', icon: 'users', tone: 'info', title: `Joint work with ${r.ColleagueName} on ${r.WorkDate}`, caption: 'Planned by your senior. Work in your planned area that day.', screen: 'TourPlan' })
+        );
+
         if (joint?.pending) {
             badges.JointWork = joint.pending;
             highlights.push({ key: 'joint', icon: 'users', tone: 'info', text: `${joint.pending} joint work request${joint.pending === 1 ? '' : 's'}`, screen: 'JointWork' });
