@@ -26,6 +26,7 @@ import Accounts from './Accounts';
 import DoctorBusiness from './DoctorBusiness';
 import DoctorSpend from './DoctorSpend';
 import Feedback from './Feedback';
+import JointWork from './JointWork';
 import FieldLedger from './FieldLedger';
 import Rcpa from './Rcpa';
 import Secondary from './Secondary';
@@ -86,6 +87,7 @@ export const STACK_SCREENS = {
     DoctorBusiness,
     DoctorSpend,
     Feedback,
+    JointWork,
     FieldLedger,
     Rcpa,
     Secondary,

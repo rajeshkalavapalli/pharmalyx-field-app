@@ -37,7 +37,7 @@ export function AttentionProvider({ children }) {
         if (!permissions.codes) return;
         const can = (list) => permissions.any(list);
         const next = nextMonth();
-        const [today, approvals, verification, requests, statement, plan, alerts] = await Promise.all([
+        const [today, approvals, verification, requests, statement, plan, alerts, joint] = await Promise.all([
             can(['visits.create']) ? quiet(api.get('/app/work/today')) : null,
             can(APPROVAL_PERMISSIONS) ? quiet(api.get('/app/approvals')) : null,
             can(['doctorrequests.create', 'doctorrequests.approve']) ? quiet(api.get('/app/doctor-verification')) : null,
@@ -45,8 +45,9 @@ export function AttentionProvider({ children }) {
             can(['expenses.view']) ? quiet(api.get('/app/expenses/statement', { params: { month: monthKey() } })) : null,
             can(['tourplan.view']) && new Date().getDate() >= 20 ? quiet(api.get('/app/tourplan', { params: { planMonth: `${next}-01` } })) : null,
             can(['alerts.view']) ? quiet(api.get('/app/insights/alerts')) : null,
+            can(['visits.create', 'visits.view']) ? quiet(api.get('/app/joint-work/pending')) : null,
         ]);
-        setData({ today, approvals, verification, requests, statement, plan, alerts, next });
+        setData({ today, approvals, verification, requests, statement, plan, alerts, joint, next });
         setSeen(await readSeen());
         setReady(true);
     }, [permissions]);
@@ -60,7 +61,7 @@ export function AttentionProvider({ children }) {
     }, [reload]);
 
     const derived = useMemo(() => {
-        const { today, approvals, verification, requests, statement, plan, alerts, next } = data;
+        const { today, approvals, verification, requests, statement, plan, alerts, joint, next } = data;
         const badges = {};
         const highlights = [];
         const items = [];
@@ -106,6 +107,12 @@ export function AttentionProvider({ children }) {
             badges.TourPlan = 1;
             highlights.push({ key: 'tourplan', icon: 'calendar', tone: 'info', text: `${monthName(next)} tour plan due ${end}`, screen: 'TourPlan', params: { month: next } });
             items.push({ key: `tourplan-${next}`, group: 'Planning', icon: 'calendar', tone: 'info', title: `Plan ${monthName(next)} before ${end}`, caption: 'Your tour plan for next month is not ready yet.', screen: 'TourPlan', params: { month: next } });
+        }
+
+        if (joint?.pending) {
+            badges.JointWork = joint.pending;
+            highlights.push({ key: 'joint', icon: 'users', tone: 'info', text: `${joint.pending} joint work request${joint.pending === 1 ? '' : 's'}`, screen: 'JointWork' });
+            items.push({ key: `joint-${joint.pending}`, group: 'Waiting for you', icon: 'users', tone: 'info', title: `${joint.pending} joint work request${joint.pending === 1 ? '' : 's'}`, caption: 'A colleague asked you to work a day with them. Confirm or decline.', screen: 'JointWork' });
         }
 
         (alerts?.alerts || [])
