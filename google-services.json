@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "405669408703",
+    "project_id": "pharmalyx-7d46a",
+    "storage_bucket": "pharmalyx-7d46a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405669408703:android:81ab83b0d59946e6433b0a",
+        "android_client_info": {
+          "package_name": "com.pharmalyx.field"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxOaO4nvWhtCRPjP8tnhwPxOEEUb19xsE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

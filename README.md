@@ -25,3 +25,7 @@
 - Phone notifications (expo-notifications): the app registers the phone after sign-in, shows notifications while open, and a tap opens the right screen (Approvals, Tour Plan, Joint Work, Leave, DCR, TA / DA); sign-out removes the phone
 - New native module: app.json version 1.1.0 (new runtime), so a new APK is needed; older APKs keep their own updates
 - Android push needs Firebase (FCM) set-up: google-services.json in the project and the FCM V1 key uploaded with `eas credentials`
+
+### V 1.0.4
+
+- Firebase (FCM) config for Android push: google-services.json (Firebase project pharmalyx-7d46a) linked in app.json `android.googleServicesFile`; it holds public identifiers only
