@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -93,6 +94,10 @@ function Tabs() {
 const navTheme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: colors.bg, primary: colors.jade, card: colors.paper, text: colors.ink, border: colors.line } };
 
 // Pharmalyx mobile app (every role). Signed out -> sign in; temporary password -> choose your own; otherwise the tabs.
+// Keep the branded splash on screen until fonts and the saved session are loaded (no blank flash).
+SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.setOptions({ duration: 300, fade: true });
+
 export default function App() {
     const [fontsLoaded] = useFonts({ PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold, Fraunces_600SemiBold });
     const [session, setSession] = useState(undefined); // undefined = still loading
@@ -108,10 +113,16 @@ export default function App() {
         });
     }, []);
 
-    if (!fontsLoaded || session === undefined) {
+    const ready = fontsLoaded && session !== undefined;
+    useEffect(() => {
+        if (ready) SplashScreen.hideAsync().catch(() => {});
+    }, [ready]);
+
+    if (!ready) {
         return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg }}>
-                <ActivityIndicator color={colors.jade} />
+            // Same colour as the splash, in case it hides before the app is ready.
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.ink }}>
+                <ActivityIndicator color={colors.jadeGlow} />
             </View>
         );
     }

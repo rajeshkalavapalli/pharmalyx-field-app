@@ -3,16 +3,17 @@ import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } f
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 
 import { chooseCompany, errorMessage, saveSession, signIn } from '../api';
 import { colors, fonts, gradients, radius, shadow, space, text } from '../theme';
 import { Button, Card, Field, Notice } from '../ui';
 
-export function BrandMark({ light }) {
+export function BrandMark({ light, large }) {
     return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <LinearGradient colors={gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.mark, shadow.glow]}>
-                <Text style={styles.markText}>P</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: large ? 14 : 10 }}>
+            <LinearGradient colors={gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.mark, large && styles.markLarge, shadow.glow]}>
+                <Text style={[styles.markText, large && styles.markTextLarge]}>P</Text>
             </LinearGradient>
             <View>
                 <Text style={[styles.wordmark, light && { color: colors.white }]}>
@@ -23,6 +24,12 @@ export function BrandMark({ light }) {
         </View>
     );
 }
+
+const POINTS = [
+    ['map-pin', 'GPS-verified doctor calls'],
+    ['file-text', 'DCR fills itself from your visits'],
+    ['credit-card', 'TA / DA worked out for you'],
+];
 
 // Sign in with username / email and password. If the login works in several companies, pick one.
 export default function SignIn() {
@@ -77,9 +84,21 @@ export default function SignIn() {
                 keyboardShouldPersistTaps="always"
                 keyboardDismissMode="none"
             >
-            <LinearGradient colors={gradients.ink} style={[styles.hero, { paddingTop: insets.top + space(3) }]}>
-                <BrandMark light />
-                <Text style={styles.heroTitle}>Your field day, in your pocket.</Text>
+            <LinearGradient colors={gradients.ink} style={[styles.hero, { paddingTop: insets.top + space(4) }]}>
+                {/* soft jade light in the corner, like the app icon */}
+                <View pointerEvents="none" style={styles.glow} />
+                <BrandMark light large />
+                <Text style={styles.heroTitle}>Field intelligence for pharma teams</Text>
+                <View style={styles.points}>
+                    {POINTS.map(([icon, label]) => (
+                        <View key={label} style={styles.point}>
+                            <View style={styles.pointIcon}>
+                                <Feather name={icon} size={14} color={colors.jadeGlow} />
+                            </View>
+                            <Text style={styles.pointText}>{label}</Text>
+                        </View>
+                    ))}
+                </View>
             </LinearGradient>
 
             <View style={styles.body}>
@@ -132,6 +151,7 @@ export default function SignIn() {
                         </>
                     )}
                 </Card>
+                <Text style={styles.version}>Pharmalyx · v{Constants.expoConfig?.version || ''}</Text>
             </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -140,13 +160,21 @@ export default function SignIn() {
 
 const styles = StyleSheet.create({
     mark: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-    markText: { fontFamily: fonts.heavy, fontSize: 18, color: colors.white },
+    markLarge: { width: 52, height: 52, borderRadius: 15 },
+    markText: { fontFamily: fonts.display, fontSize: 21, color: colors.white, marginTop: -1 },
+    markTextLarge: { fontSize: 29 },
     wordmark: { fontFamily: fonts.display, fontSize: 21, color: colors.ink, letterSpacing: -0.3 },
     tagline: { fontFamily: fonts.bold, fontSize: 9, letterSpacing: 1.6, color: colors.inkMuted },
     safe: { flex: 1, backgroundColor: colors.bg },
-    hero: { paddingHorizontal: space(3), paddingTop: space(3), paddingBottom: space(3) },
-    heroTitle: { fontFamily: fonts.display, fontSize: 22, lineHeight: 28, color: colors.white, marginTop: space(2.5) },
-    body: { flex: 1, paddingHorizontal: space(2), paddingTop: space(2.5) },
+    hero: { paddingHorizontal: space(3), paddingBottom: space(6), overflow: 'hidden' },
+    glow: { position: 'absolute', width: 280, height: 280, borderRadius: 140, right: -110, top: -90, backgroundColor: colors.jadeGlow, opacity: 0.16 },
+    heroTitle: { fontFamily: fonts.display, fontSize: 26, lineHeight: 32, color: colors.white, marginTop: space(3), letterSpacing: -0.3 },
+    points: { marginTop: space(2.5), gap: space(1.25) },
+    point: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    pointIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(45,212,191,0.14)' },
+    pointText: { fontFamily: fonts.medium, fontSize: 14, color: 'rgba(255,255,255,0.86)' },
+    body: { flex: 1, paddingHorizontal: space(2), marginTop: -space(3.5) },
+    version: { textAlign: 'center', fontFamily: fonts.medium, fontSize: 11, color: colors.inkFaint, marginTop: space(2.5) },
     formCard: { padding: space(2.5), borderRadius: radius.xl },
     company: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: space(1.75), borderWidth: 1, borderColor: colors.line, borderRadius: radius.md },
     footnote: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: space(2) },

@@ -34,3 +34,9 @@
 
 - New app icon: the Pharmalyx "P" (jade gradient, Fraunces), replacing the Expo template icon; Android adaptive icon, themed (monochrome) icon, splash and favicon to match
 - Notification small icon: white "P" (assets/notification-icon.png) tinted jade
+
+### V 1.0.6
+
+- Branded splash screen (expo-splash-screen): the "P" tile on dark navy; it stays until fonts and the saved sign-in are loaded, then fades, so there is no blank screen with a spinner
+- Sign-in screen: larger dark hero with the Fraunces "P" mark (same as the app icon), "Field intelligence for pharma teams", three points (GPS-verified calls, DCR fills itself, TA / DA worked out), the form card overlapping the hero, app version at the bottom
+- New native module: app.json version 1.2.0 (new runtime), so a new APK is needed
