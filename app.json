@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pharmalyx",
     "slug": "pharmalyx-field-app",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -34,6 +34,13 @@
     },
     "plugins": [
       "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#0F766E",
+          "defaultChannel": "default"
+        }
+      ],
       "expo-font",
       [
         "expo-image-picker",

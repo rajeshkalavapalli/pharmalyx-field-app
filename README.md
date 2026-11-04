@@ -18,3 +18,10 @@
 
 - Tour plan: "Joint work" day type for seniors with a team member picker; "Change their area" for a joint day; days a senior planned with me are shown as "With <name>" and locked
 - My Day shows today's joint work; Alerts show days to replan (team member on leave) and joint days a senior planned with me
+
+
+### V 1.0.3
+
+- Phone notifications (expo-notifications): the app registers the phone after sign-in, shows notifications while open, and a tap opens the right screen (Approvals, Tour Plan, Joint Work, Leave, DCR, TA / DA); sign-out removes the phone
+- New native module: app.json version 1.1.0 (new runtime), so a new APK is needed; older APKs keep their own updates
+- Android push needs Firebase (FCM) set-up: google-services.json in the project and the FCM V1 key uploaded with `eas credentials`

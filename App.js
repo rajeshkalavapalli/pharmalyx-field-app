@@ -11,6 +11,7 @@ import { useFonts, PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJa
 import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces';
 
 import { loadSession, onSessionChange } from './src/api';
+import { navigationRef, usePush } from './src/push';
 import { AttentionProvider, useAttention } from './src/attention';
 import { stopTrail } from './src/location';
 import { PermissionsProvider, usePermissions } from './src/permissions';
@@ -96,6 +97,9 @@ export default function App() {
     const [fontsLoaded] = useFonts({ PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold, Fraunces_600SemiBold });
     const [session, setSession] = useState(undefined); // undefined = still loading
 
+    // Phone notifications for the signed-in person (once past the first password change).
+    usePush(Boolean(session && !session.mustChangePassword));
+
     useEffect(() => {
         loadSession().then(setSession);
         return onSessionChange((next) => {
@@ -129,7 +133,7 @@ export default function App() {
             {/* keyed by user + company so permissions reload after switching account */}
             <PermissionsProvider key={`${session.user?.UserId}-${session.user?.organisation?.OrganisationId || ''}`}>
                 <AttentionProvider>
-                <NavigationContainer theme={navTheme}>
+                <NavigationContainer ref={navigationRef} theme={navTheme}>
                     <StatusBar style="dark" />
                     <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
                         <Stack.Screen name="Tabs" component={Tabs} />

@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { attendanceCheckOut, cancelLeave, clearSession, currentSession, errorMessage, getAttendanceMonth, getAttendanceToday, getLeave, monthKey } from '../api';
+import { unregisterPush } from '../push';
 import { getFix } from '../location';
 import { colors, fonts, gradients, radius, space, text } from '../theme';
 import { titleCase } from '../format';
@@ -91,7 +92,7 @@ export default function Me({ navigation }) {
     const signOut = () =>
         Alert.alert('Sign out?', 'You can sign in again any time.', [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Sign out', style: 'destructive', onPress: clearSession },
+            { text: 'Sign out', style: 'destructive', onPress: async () => { await unregisterPush(); await clearSession(); } },
         ]);
 
     const name = titleCase(user?.Name || user?.UserName || '');
