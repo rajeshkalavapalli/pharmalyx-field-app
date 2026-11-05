@@ -40,3 +40,10 @@
 - Branded splash screen (expo-splash-screen): the "P" tile on dark navy; it stays until fonts and the saved sign-in are loaded, then fades, so there is no blank screen with a spinner
 - Sign-in screen: larger dark hero with the Fraunces "P" mark (same as the app icon), "Field intelligence for pharma teams", three points (GPS-verified calls, DCR fills itself, TA / DA worked out), the form card overlapping the hero, app version at the bottom
 - New native module: app.json version 1.2.0 (new runtime), so a new APK is needed
+
+
+### V 1.0.7
+
+- Admin pharmacies / stockists: owner, phone, address (and area for stockists) are required, as the database needs them; doctors: qualification and clinic are required like the web form
+- Country / state on doctors, pharmacies and stockists say "blank = territory's" (the server fills them in)
+- JS-only change: shipped as an OTA update (npm run update:preview), no new APK
