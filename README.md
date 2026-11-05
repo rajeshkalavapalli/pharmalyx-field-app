@@ -47,3 +47,9 @@
 - Admin pharmacies / stockists: owner, phone, address (and area for stockists) are required, as the database needs them; doctors: qualification and clinic are required like the web form
 - Country / state on doctors, pharmacies and stockists say "blank = territory's" (the server fills them in)
 - JS-only change: shipped as an OTA update (npm run update:preview), no new APK
+
+
+### V 1.0.8
+
+- Samples / gifts: Issue list comes from /app/stock/recipients (direct reports, or everyone for an admin) with the designation shown; the button shows for anyone who can issue
+- JS-only change: shipped as an OTA update

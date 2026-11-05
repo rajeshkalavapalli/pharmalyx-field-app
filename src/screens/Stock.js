@@ -14,7 +14,7 @@ const ENTRY = { ISSUE: { label: 'Issued', tone: 'success' }, DISTRIBUTION: { lab
 const LOW = 5;
 
 // Issue (manager) or return (rep) units of a sample / gift.
-function MoveSheet({ mode, kind, userId, people, balances, onClose, onSaved }) {
+function MoveSheet({ mode, kind, userId, recipients, balances, onClose, onSaved }) {
     const [items, setItems] = useState([]);
     const [person, setPerson] = useState(userId || '');
     const [item, setItem] = useState('');
@@ -63,7 +63,7 @@ function MoveSheet({ mode, kind, userId, people, balances, onClose, onSaved }) {
                         </Pressable>
                     </View>
                     {mode === 'issue' ? (
-                        <Select label="To" value={person} options={people.users.filter((u) => String(u.UserId).toLowerCase() !== people.meId).map((u) => ({ value: u.UserId, label: titleCase(u.Name) }))} onChange={setPerson} />
+                        <Select label="To" value={person} options={recipients.map((u) => ({ value: u.UserId, label: titleCase(u.Name), detail: u.DesignationName || undefined }))} onChange={setPerson} />
                     ) : null}
                     <Select label={kind === 'SAMPLE' ? 'Product' : 'Gift'} value={item} options={options} onChange={setItem} searchable />
                     <Field label="Quantity" value={qty} onChangeText={(v) => setQty(v.replace(/\D/g, '').slice(0, 6))} keyboardType="number-pad" />
@@ -80,6 +80,9 @@ function MoveSheet({ mode, kind, userId, people, balances, onClose, onSaved }) {
 export default function Stock({ navigation, route }) {
     const kind = route.params?.kind === 'GIFT' ? 'GIFT' : 'SAMPLE';
     const people = usePeople();
+    // Who "Issue" can go to: direct reports, or everyone in the company for an admin.
+    const recipients = useLoad(async () => (await api.get('/app/stock/recipients')).data?.users || [], [], '');
+    const canIssue = (recipients.data || []).length > 0;
     const [userId, setUserId] = useState('');
     const [tab, setTab] = useState('balances');
     const [moving, setMoving] = useState(null); // issue | return
@@ -93,7 +96,7 @@ export default function Stock({ navigation, route }) {
             <PersonPicker people={people} value={userId} onChange={setUserId} />
             <View style={styles.actions}>
                 {!userId ? <Button title="Return" icon="corner-up-left" variant="outline" small onPress={() => setMoving('return')} style={{ flex: 1 }} /> : null}
-                {people.hasTeam ? <Button title="Issue to team" icon="send" small onPress={() => setMoving('issue')} style={{ flex: 1 }} /> : null}
+                {canIssue ? <Button title="Issue" icon="send" small onPress={() => setMoving('issue')} style={{ flex: 1 }} /> : null}
             </View>
             <Chips
                 options={[
@@ -158,7 +161,7 @@ export default function Stock({ navigation, route }) {
                     mode={moving}
                     kind={kind}
                     userId={userId}
-                    people={people}
+                    recipients={recipients.data || []}
                     balances={balances.data || []}
                     onClose={() => setMoving(null)}
                     onSaved={() => {
