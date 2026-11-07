@@ -122,6 +122,9 @@ const TE = {
     'Back to My Day': 'నా రోజుకి తిరిగి',
     'Same as last visit': 'గత విజిట్ లాగే',
     'Try again': 'మళ్ళీ ప్రయత్నించండి',
+    'Voice note': 'వాయిస్ నోట్',
+    'Record a voice note': 'వాయిస్ నోట్ రికార్డ్ చేయండి',
+    Stop: 'ఆపండి',
 
     // Me
     'Attendance today': 'ఈ రోజు హాజరు',

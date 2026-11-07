@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { api, checkIn, errorMessage, saveVisit } from '../api';
+import { AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
+
+import { api, checkIn, errorMessage, saveVisit, uploadImage } from '../api';
 import { getFix } from '../location';
 import { toast } from '../toast';
 import { colors, fonts, radius, space, text } from '../theme';
@@ -23,6 +25,61 @@ const uuid = () =>
         const r = (Math.random() * 16) | 0;
         return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
     });
+
+// A short voice note instead of typing (saved with the visit). Uses the phone's microphone.
+function VoiceNote({ note, setNote }) {
+    const recorder = useAudioRecorder(RecordingPresets.LOW_QUALITY);
+    const state = useAudioRecorderState(recorder, 500);
+    const recording = state.isRecording;
+
+    const start = async () => {
+        try {
+            const permission = await AudioModule.requestRecordingPermissionsAsync();
+            if (!permission.granted) {
+                Alert.alert('Microphone', 'Allow the microphone to record a voice note.');
+                return;
+            }
+            await setAudioModeAsync({ playsInSilentMode: true, allowsRecording: true });
+            await recorder.prepareToRecordAsync();
+            recorder.record();
+        } catch (err) {
+            Alert.alert('Voice note', err.message || "Couldn't start recording.");
+        }
+    };
+
+    const stop = async () => {
+        try {
+            const seconds = Math.round((state.durationMillis || 0) / 1000);
+            await recorder.stop();
+            await setAudioModeAsync({ allowsRecording: false });
+            if (recorder.uri) setNote({ uri: recorder.uri, seconds });
+        } catch (err) {
+            Alert.alert('Voice note', err.message || "Couldn't stop recording.");
+        }
+    };
+
+    if (note && !recording) {
+        return (
+            <View style={styles.voiceRow}>
+                <Feather name="mic" size={16} color={colors.jade} />
+                <Text style={[text.body, { flex: 1 }]}>{`${t('Voice note')} · ${mmss(note.seconds)}`}</Text>
+                <Pressable onPress={() => setNote(null)} hitSlop={8} accessibilityLabel="Delete voice note">
+                    <Feather name="trash-2" size={16} color={colors.errorDark} />
+                </Pressable>
+            </View>
+        );
+    }
+    return (
+        <Button
+            title={recording ? `${t('Stop')} · ${mmss(Math.round((state.durationMillis || 0) / 1000))}` : t('Record a voice note')}
+            icon={recording ? 'square' : 'mic'}
+            variant={recording ? 'primary' : 'outline'}
+            small
+            onPress={recording ? stop : start}
+            style={{ alignSelf: 'flex-start', marginBottom: space(2) }}
+        />
+    );
+}
 
 // Samples and gifts in the rep's bag (balance > 0), to record what was given at this visit.
 function GivenItems({ given, setGiven, prefill }) {
@@ -90,6 +147,7 @@ export default function Visit({ route, navigation }) {
     const [given, setGiven] = useState({}); // "SAMPLE:<id>" -> quantity
     const [last, setLast] = useState(null); // the last visit to this doctor, for "same as last visit"
     const [prefill, setPrefill] = useState(null);
+    const [voice, setVoice] = useState(null); // { uri, seconds } recorded before saving
 
     useEffect(() => {
         let alive = true;
@@ -165,6 +223,12 @@ export default function Visit({ route, navigation }) {
                     .filter(([, qty]) => qty > 0)
                     .map(([k, qty]) => ({ ItemType: k.split(':')[0], ItemId: k.split(':')[1], Quantity: qty })),
             });
+            // The voice note goes up after the visit is saved (a failed upload never loses the visit).
+            if (voice?.uri) {
+                await uploadImage(`/app/visits/${visitId}/voice?duration=${voice.seconds}`, voice.uri, 'audio/mp4').catch((err) =>
+                    Alert.alert('Voice note', errorMessage(err, "The visit is saved, but the voice note didn't upload."))
+                );
+            }
             setResult(response?.data || response || {});
         } catch (err) {
             Alert.alert('Save visit', errorMessage(err, "Couldn't save the visit."));
@@ -257,6 +321,7 @@ export default function Visit({ route, navigation }) {
             <Text style={[text.title, { marginBottom: space(1) }]}>{t("Samples & gifts given")}</Text>
             <GivenItems given={given} setGiven={setGiven} prefill={prefill} />
 
+            <VoiceNote note={voice} setNote={setVoice} />
             <Field label={t("Notes (optional)")} value={notes} onChangeText={(v) => setNotes(v.slice(0, 1000))} multiline placeholder="What was discussed, products, next step…" autoCapitalize="sentences" />
 
             <Button title={saving ? t("Saving…") : t("Save visit")} icon="check" onPress={save} busy={saving} disabled={checkInState.status === 'working'} />
@@ -272,6 +337,7 @@ const styles = StyleSheet.create({
     feedback: { flex: 1, alignItems: 'center', gap: 6, paddingVertical: space(1.5), borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.paper },
     feedbackOn: { backgroundColor: colors.jade, borderColor: colors.jade },
     feedbackText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.inkSoft },
+    voiceRow: { flexDirection: 'row', alignItems: 'center', gap: space(1), padding: space(1.25), borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.paper, marginBottom: space(2) },
     itemRow: { flexDirection: 'row', alignItems: 'center', gap: space(1), paddingVertical: space(1) },
     itemName: { fontFamily: fonts.semibold, fontSize: 14, color: colors.ink },
     stepBtn: { width: 34, height: 34, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.paper },

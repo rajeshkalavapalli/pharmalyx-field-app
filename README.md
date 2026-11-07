@@ -101,3 +101,11 @@
 - Telugu language (src/i18n.js): Me > Language switches English / తెలుగు (saved on the phone, the app reloads); English text is the key, so anything not yet translated stays English
 - Translated so far: tabs, Home menu sections and tiles, My Day, Visit, Me (score, attendance, language), Chemist Check
 - JS-only change: shipped as an OTA update (Android)
+
+
+### V 1.0.16
+
+- Joint audit check-in asks for the fingerprint / face (expo-local-authentication + secure-store key that Android drops when fingerprints change); the server is told when fingerprints changed
+- Visit screen: record a voice note instead of typing (expo-audio); it uploads after the visit is saved, so a failed upload never loses the visit
+- Microphone permission no longer blocked (image-picker had microphonePermission false); light splash background
+- NEW NATIVE MODULES: app version 1.3.0 (new runtime) - needs a new APK (npm run build:apk); OTA updates for 1.2.0 phones stop here

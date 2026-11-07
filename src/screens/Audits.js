@@ -4,6 +4,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { api, errorMessage } from '../api';
 import { titleCase } from '../format';
 import { getFix } from '../location';
+import { biometricProof } from '../biometric';
 import { toast } from '../toast';
 import { colors, fonts, space, text } from '../theme';
 import useLoad from '../useLoad';
@@ -30,9 +31,17 @@ function AuditCard({ audit, onDone }) {
     const checkIn = async () => {
         setBusy(true);
         try {
+            // Fingerprint / face first (on phones that have it), then the clinic location.
+            let proof = { available: false };
+            try {
+                proof = await biometricProof();
+            } catch {
+                throw new Error('Fingerprint check cancelled. The audit needs your fingerprint or face to confirm it is you.');
+            }
             const fix = await getFix();
             if (fix.status !== 'CAPTURED') throw new Error("Couldn't get your location. Turn on location and try again.");
-            const r = (await api.post(`/app/audits/${audit.auditId}/check-in`, { Location: fix })).data;
+            const r = (await api.post(`/app/audits/${audit.auditId}/check-in`, { Location: fix, DeviceId: proof.deviceId, BiometricSecret: proof.secret })).data;
+            if (proof.changed) Alert.alert('Fingerprints changed', 'Fingerprints on this phone were changed, so the check was set up again. Head office can see this.');
             toast(r.message || 'Checked in');
             onDone();
         } catch (err) {
