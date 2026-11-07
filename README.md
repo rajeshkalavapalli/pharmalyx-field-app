@@ -117,3 +117,9 @@
 - My Day: the location trail start can no longer throw an unhandled error
 - Loading screen uses the light background like the new splash
 - JS-only change: OTA update for app 1.3.0 (npm run update:preview)
+
+
+### V 1.0.18
+
+- Fixed My Day "undefined is not a function" after the day starts: the status card's local `t` (location trail info) hid the translation function t(); renamed to trailInfo
+- JS-only change: OTA update for app 1.3.0

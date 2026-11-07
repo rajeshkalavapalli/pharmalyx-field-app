@@ -126,7 +126,7 @@ function DayStatus({ data, trail, loadedAt, busy, onAccept, onStart }) {
         );
     }
 
-    const t = TRAIL[trail];
+    const trailInfo = TRAIL[trail];
     return (
         <LinearGradient colors={gradients.soft} style={styles.statusDark}>
             <View style={styles.statusTop}>
@@ -151,7 +151,7 @@ function DayStatus({ data, trail, loadedAt, busy, onAccept, onStart }) {
             <View style={styles.metaRow}>
                 <Feather name="clock" size={13} color={colors.inkMuted} />
                 <Text style={styles.metaText}>Started {clock(data.workDay.StartedAt)}</Text>
-                {t ? <Text style={[styles.metaText, { color: t.tone === 'error' ? colors.errorDark : colors.jade }]}>· {t.label}</Text> : null}
+                {trailInfo ? <Text style={[styles.metaText, { color: trailInfo.tone === 'error' ? colors.errorDark : colors.jade }]}>· {trailInfo.label}</Text> : null}
             </View>
             <View style={styles.metaRow}>
                 <Feather name="refresh-cw" size={13} color={colors.inkMuted} />
