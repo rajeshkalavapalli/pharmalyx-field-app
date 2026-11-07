@@ -37,7 +37,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "build:apk": "npx eas-cli@latest build --platform android --profile preview",
-    "update:preview": "npx eas-cli@latest update --channel preview --environment preview"
+    "update:preview": "npx eas-cli@latest update --channel preview --environment preview --platform android"
   },
   "private": true,
   "devDependencies": {

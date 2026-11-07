@@ -80,3 +80,5 @@
 - My Day: Usual time / Nearest first switch - one GPS reading orders the doctors by distance and shows how far each clinic is
 - Visit: Same as last visit - fills feedback, notes and samples / gifts from the last visit to this doctor (never more than is in hand)
 - JS-only change: shipped as an OTA update
+- OTA updates are published for Android only (npm run update:preview adds --platform android): bundling iOS and Android together ran out of memory on the build PC, and the field team uses Android
+- Nearest-first distance maths uses Math.pow
