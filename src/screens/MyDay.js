@@ -9,7 +9,7 @@ import { ago, clock, doctorName, initial, plural, titleCase } from '../format';
 import { getFix, startTrail } from '../location';
 import { colors, fonts, gradients, radius, space, text } from '../theme';
 import { toast } from '../toast';
-import { Button, Card, Empty, ErrorState, Notice, ProgressBar, Screen, SectionTitle, Skeleton, SkeletonList, Tag } from '../ui';
+import { Button, Card, Chips, Empty, ErrorState, Notice, ProgressBar, Screen, SectionTitle, Skeleton, SkeletonList, Tag } from '../ui';
 
 export const RESULT = {
     VALID: { label: 'Counted', tone: 'success' },
@@ -40,7 +40,7 @@ function DoctorRow({ doctor, onCheckIn }) {
                     {doctorName(doctor.DoctorName)}
                 </Text>
                 <Text style={text.small} numberOfLines={1}>
-                    {[titleCase(doctor.Speciality), titleCase(doctor.AreaName)].filter(Boolean).join(' · ')}
+                    {[titleCase(doctor.Speciality), titleCase(doctor.AreaName), doctor.km != null && `${doctor.km < 1 ? Math.round(doctor.km * 1000) + ' m' : doctor.km.toFixed(1) + ' km'} away`].filter(Boolean).join(' · ')}
                 </Text>
                 <View style={styles.tags}>
                     {doctor.Category ? <Tag label={`Class ${doctor.Category}`} tone="primary" /> : null}
@@ -66,6 +66,25 @@ function QuickAction({ icon, label, onPress }) {
         </Pressable>
     );
 }
+
+
+// Straight-line distance in km (for "nearest first"; roads are longer, the order is what matters).
+const kmBetween = (a, b) => {
+    const rad = (d) => (d * Math.PI) / 180;
+    const dLat = rad(b.lat - a.lat);
+    const dLng = rad(b.lng - a.lng);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+    return 6371 * 2 * Math.asin(Math.sqrt(h));
+};
+
+// Doctors with a known clinic first, nearest first; the rest keep their order at the end.
+const byNearest = (list, here) => {
+    if (!here) return list;
+    const withKm = list.map((d, i) => ({ d: d.lat != null && d.lng != null ? { ...d, km: kmBetween(here, d) } : d, i }));
+    return withKm
+        .sort((x, y) => (x.d.km ?? Infinity) - (y.d.km ?? Infinity) || x.i - y.i)
+        .map((x) => x.d);
+};
 
 // The one status area: what the day looks like and what to do next.
 function DayStatus({ data, trail, loadedAt, busy, onAccept, onStart }) {
@@ -163,6 +182,7 @@ export default function MyDay({ navigation }) {
     const [busy, setBusy] = useState(false);
     const [trail, setTrail] = useState(null); // background | foreground | off
     const [showAll, setShowAll] = useState(false);
+    const [here, setHere] = useState(null); // phone location for "nearest first"
     const user = currentSession()?.user;
 
     const load = useCallback(async () => {
@@ -230,7 +250,17 @@ export default function MyDay({ navigation }) {
     };
 
     const firstName = titleCase(String(user?.Name || user?.UserName || '').split(' ')[0]);
-    const others = data ? (showAll ? data.otherDue : data.otherDue.slice(0, 8)) : [];
+    const plan = data ? byNearest(data.plan, here) : [];
+    const otherDue = data ? byNearest(data.otherDue, here) : [];
+    const others = showAll ? otherDue : otherDue.slice(0, 8);
+
+    // "Nearest first": one GPS reading, then the lists are ordered by distance from here.
+    const toggleNearest = async () => {
+        if (here) return setHere(null);
+        const fix = await getFix().catch(() => null);
+        if (fix?.status === 'CAPTURED') setHere({ lat: fix.latitude, lng: fix.longitude });
+        else toast("Couldn't get your location for nearest first.", 'error');
+    };
     const started = Boolean(data?.workDay);
 
     return (
@@ -272,10 +302,20 @@ export default function MyDay({ navigation }) {
                         <QuickAction icon="calendar" label="Leave" onPress={() => navigation.navigate('Me')} />
                     </View>
 
-                    <SectionTitle title={data.planned?.areaName ? `Today's plan · ${titleCase(data.planned.areaName)}` : "Today's plan"} caption="Ordered by when each doctor is usually available." />
-                    {data.plan.length ? (
+                    <SectionTitle title={data.planned?.areaName ? `Today's plan · ${titleCase(data.planned.areaName)}` : "Today's plan"} caption={here ? 'Nearest clinic first, from where you are now.' : 'Ordered by when each doctor is usually available.'} />
+                    {data.plan.length + data.otherDue.length > 1 ? (
+                        <Chips
+                            options={[
+                                { value: 'time', label: 'Usual time' },
+                                { value: 'near', label: 'Nearest first' },
+                            ]}
+                            value={here ? 'near' : 'time'}
+                            onChange={(v) => ((v === 'near') !== Boolean(here) ? toggleNearest() : null)}
+                        />
+                    ) : null}
+                    {plan.length ? (
                         <View style={{ gap: space(1.25) }}>
-                            {data.plan.map((doctor) => (
+                            {plan.map((doctor) => (
                                 <DoctorRow key={doctor.DoctorId} doctor={doctor} onCheckIn={openVisit} />
                             ))}
                         </View>

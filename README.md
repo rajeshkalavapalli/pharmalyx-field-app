@@ -71,3 +71,12 @@
 
 - Light header cards (gradients.soft: white into jade mist, thin border, ink text) instead of dark navy on Home (welcome card), Today (DA status card) and Me (profile card)
 - JS-only change: shipped as an OTA update
+
+
+### V 1.0.12
+
+- Joint Audits screen (seniors): today's audit doctors (only the auditor sees them) with check-in at the clinic and the result (Doctor met / not found / clinic not found / didn't know the rep), plus Team scores with the Field Truth Score breakdown; also under Insights > Field Truth
+- Me: My Field Truth Score card (score, band, the four parts, how to raise it; learning-mode note)
+- My Day: Usual time / Nearest first switch - one GPS reading orders the doctors by distance and shows how far each clinic is
+- Visit: Same as last visit - fills feedback, notes and samples / gifts from the last visit to this doctor (never more than is in hand)
+- JS-only change: shipped as an OTA update

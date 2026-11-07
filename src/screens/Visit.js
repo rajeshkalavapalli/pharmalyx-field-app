@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 
 import { api, checkIn, errorMessage, saveVisit } from '../api';
 import { getFix } from '../location';
+import { toast } from '../toast';
 import { colors, fonts, radius, space, text } from '../theme';
 import { doctorName, titleCase } from '../format';
 import { Button, Card, Field, Header, Notice, Screen, Tag } from '../ui';
@@ -23,7 +24,7 @@ const uuid = () =>
     });
 
 // Samples and gifts in the rep's bag (balance > 0), to record what was given at this visit.
-function GivenItems({ given, setGiven }) {
+function GivenItems({ given, setGiven, prefill }) {
     const [items, setItems] = useState(null);
 
     useEffect(() => {
@@ -31,6 +32,17 @@ function GivenItems({ given, setGiven }) {
             .then((lists) => setItems(lists.flat().filter((b) => Number(b.Balance) > 0)))
             .catch(() => setItems([]));
     }, []);
+
+    // "Same as last visit": take the last visit's items, never more than is in hand now.
+    useEffect(() => {
+        if (!items || !prefill) return;
+        const next = {};
+        prefill.forEach((p) => {
+            const held = items.find((b) => b.ItemType === p.ItemType && String(b.ItemId).toLowerCase() === String(p.ItemId).toLowerCase());
+            if (held) next[`${held.ItemType}:${held.ItemId}`] = Math.min(Number(held.Balance), Number(p.Quantity) || 0);
+        });
+        setGiven(next);
+    }, [items, prefill, setGiven]);
 
     if (!items) return null;
     if (!items.length) return <Text style={[text.small, { marginBottom: space(2) }]}>No samples or gifts in hand. Your manager issues them.</Text>;
@@ -75,6 +87,35 @@ export default function Visit({ route, navigation }) {
     const [saving, setSaving] = useState(false);
     const [result, setResult] = useState(null);
     const [given, setGiven] = useState({}); // "SAMPLE:<id>" -> quantity
+    const [last, setLast] = useState(null); // the last visit to this doctor, for "same as last visit"
+    const [prefill, setPrefill] = useState(null);
+
+    useEffect(() => {
+        let alive = true;
+        const from = new Date(`${date}T00:00:00`);
+        from.setDate(from.getDate() - 60);
+        const fromKey = `${from.getFullYear()}-${String(from.getMonth() + 1).padStart(2, '0')}-${String(from.getDate()).padStart(2, '0')}`;
+        api.get('/app/visits', { params: { doctorId: doctor.DoctorId, from: fromKey, to: date } })
+            .then(async (r) => {
+                const list = (r.data?.visits || []).filter((v) => v.VisitId !== visitId).sort((a, b) => String(b.VisitDate).localeCompare(String(a.VisitDate)));
+                if (!list.length) return;
+                const detail = (await api.get(`/app/visits/${list[0].VisitId}`)).data;
+                if (alive) setLast({ date: String(list[0].VisitDate).slice(0, 10), feedback: detail.Feedback || null, notes: detail.Notes || '', items: detail.Items || [] });
+            })
+            .catch(() => null);
+        return () => {
+            alive = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const sameAsLast = () => {
+        if (!last) return;
+        if (last.feedback) setFeedback(last.feedback);
+        if (last.notes) setNotes(last.notes);
+        setPrefill(last.items);
+        toast('Filled from your last visit. Change anything that is different today.');
+    };
     const visitId = useRef(uuid()).current;
 
     const doCheckIn = async (retry = true) => {
@@ -188,6 +229,17 @@ export default function Visit({ route, navigation }) {
             {checkInState.status === 'done' && clinic && !clinic.pinned && <Notice tone="info">This clinic’s location is not pinned yet, so the visit will need a look.</Notice>}
             {checkInState.status === 'done' && checkInState.mocked && <Notice tone="error">A location-changing app is on. Please turn it off to check in.</Notice>}
 
+            {last ? (
+                <Button
+                    title={`Same as last visit · ${new Date(`${last.date}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
+                    icon="copy"
+                    variant="outline"
+                    small
+                    onPress={sameAsLast}
+                    style={{ alignSelf: 'flex-start', marginTop: space(1) }}
+                />
+            ) : null}
+
             <Text style={[text.title, { marginTop: space(1) }]}>How did it go?</Text>
             <View style={styles.feedbackRow}>
                 {FEEDBACK.map((item) => {
@@ -202,7 +254,7 @@ export default function Visit({ route, navigation }) {
             </View>
 
             <Text style={[text.title, { marginBottom: space(1) }]}>Samples & gifts given</Text>
-            <GivenItems given={given} setGiven={setGiven} />
+            <GivenItems given={given} setGiven={setGiven} prefill={prefill} />
 
             <Field label="Notes (optional)" value={notes} onChangeText={(v) => setNotes(v.slice(0, 1000))} multiline placeholder="What was discussed, products, next step…" autoCapitalize="sentences" />
 

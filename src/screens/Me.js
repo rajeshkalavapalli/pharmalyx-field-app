@@ -1,15 +1,15 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { attendanceCheckOut, cancelLeave, clearSession, currentSession, errorMessage, getAttendanceMonth, getAttendanceToday, getLeave, monthKey } from '../api';
+import { api, attendanceCheckOut, cancelLeave, clearSession, currentSession, errorMessage, getAttendanceMonth, getAttendanceToday, getLeave, monthKey } from '../api';
 import { unregisterPush } from '../push';
 import { getFix } from '../location';
 import { colors, fonts, gradients, radius, space, text } from '../theme';
 import { titleCase } from '../format';
 import { toast } from '../toast';
-import { Button, Card, Notice, Screen, SectionTitle, Skeleton, StatTile, Tag } from '../ui';
+import { Button, Card, Notice, ProgressBar, Screen, SectionTitle, Skeleton, StatTile, Tag } from '../ui';
 
 const LEAVE_STATUS = {
     PENDING: { label: 'Pending', tone: 'warning' },
@@ -20,6 +20,54 @@ const LEAVE_STATUS = {
 const shortDate = (key) => new Date(`${String(key).slice(0, 10)}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 
 // Profile, today's attendance, this month at a glance, leave, and sign out.
+const SCORE_BAND = { TRUSTED: { label: 'Trusted', tone: 'success' }, WATCH: { label: 'Watch', tone: 'warning' }, RISK: { label: 'Needs work', tone: 'error' }, NO_DATA: { label: 'No visits yet', tone: 'neutral' } };
+
+// The person's own Field Truth Score this month: what counts and how to raise it. Audits show as counts only.
+function MyScore() {
+    const [data, setData] = useState(null);
+    useEffect(() => {
+        let alive = true;
+        api.get('/app/truth/me')
+            .then((r) => alive && setData(r.data))
+            .catch(() => alive && setData({ available: false }));
+        return () => {
+            alive = false;
+        };
+    }, []);
+    if (!data?.available || !data.score) return null;
+    const s = data.score;
+    const band = SCORE_BAND[s.band] || SCORE_BAND.NO_DATA;
+    return (
+        <>
+            <SectionTitle title="My Field Truth Score" caption={data.learningMode ? 'Learning mode: for coaching only' : 'This month'} />
+            <Card style={{ marginBottom: space(1.5) }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: space(1.5) }}>
+                    <View style={styles.scoreBubble}>
+                        <Text style={styles.scoreBig}>{s.score ?? '—'}</Text>
+                        <Text style={styles.scoreSmall}>of 100</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Tag label={band.label} tone={band.tone} icon={s.band === 'TRUSTED' ? 'award' : undefined} />
+                        <Text style={[text.small, { marginTop: 6 }]}>{s.visits} visits · verified work, steady calls and doctors who prescribe raise it.</Text>
+                    </View>
+                </View>
+                <View style={{ marginTop: space(1.5), gap: 6 }}>
+                    {[['presence', 'At the clinic'], ['pattern', 'Visit pattern'], ['audits', 'Audits'], ['outcome', 'Prescriptions']].map(([k, label]) => (
+                        <View key={k} style={{ flexDirection: 'row', alignItems: 'center', gap: space(1) }}>
+                            <Text style={styles.partLabel}>{label}</Text>
+                            <View style={{ flex: 1 }}>
+                                <ProgressBar value={(s.parts[k].value || 0) / s.parts[k].max} height={6} />
+                            </View>
+                            <Text style={styles.partValue}>{s.parts[k].value ?? '—'}/{s.parts[k].max}</Text>
+                        </View>
+                    ))}
+                </View>
+                {s.notes?.length ? <Text style={[text.small, { marginTop: space(1) }]}>{s.notes.join(' · ')}</Text> : null}
+            </Card>
+        </>
+    );
+}
+
 export default function Me({ navigation }) {
     const user = currentSession()?.user;
     const [today, setToday] = useState(null);
@@ -110,6 +158,8 @@ export default function Me({ navigation }) {
                 </View>
             </LinearGradient>
 
+            <MyScore />
+
             {error ? <Notice tone="error">{error}</Notice> : null}
 
             <SectionTitle title="Attendance today" />
@@ -187,6 +237,11 @@ export default function Me({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    scoreBubble: { width: 66, height: 66, borderRadius: 33, borderWidth: 2, borderColor: colors.jade, alignItems: 'center', justifyContent: 'center' },
+    scoreBig: { fontFamily: fonts.heavy, fontSize: 22, lineHeight: 24, color: colors.ink },
+    scoreSmall: { fontFamily: fonts.semibold, fontSize: 10, color: colors.inkMuted },
+    partLabel: { width: 96, fontFamily: fonts.medium, fontSize: 12, color: colors.inkMuted },
+    partValue: { width: 44, textAlign: 'right', fontFamily: fonts.semibold, fontSize: 12, color: colors.ink },
     profile: { flexDirection: 'row', alignItems: 'center', gap: space(1.5), padding: space(2), borderRadius: radius.xl, marginBottom: space(1), borderWidth: 1, borderColor: colors.line },
     avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
     avatarText: { fontFamily: fonts.heavy, fontSize: 20, color: colors.white },
