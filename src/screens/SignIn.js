@@ -84,16 +84,16 @@ export default function SignIn() {
                 keyboardShouldPersistTaps="always"
                 keyboardDismissMode="none"
             >
-            <LinearGradient colors={gradients.ink} style={[styles.hero, { paddingTop: insets.top + space(4) }]}>
-                {/* soft jade light in the corner, like the app icon */}
+            <LinearGradient colors={gradients.mist} style={[styles.hero, { paddingTop: insets.top + space(4) }]}>
+                {/* soft jade light in the corner */}
                 <View pointerEvents="none" style={styles.glow} />
-                <BrandMark light large />
+                <BrandMark large />
                 <Text style={styles.heroTitle}>Field intelligence for pharma teams</Text>
                 <View style={styles.points}>
                     {POINTS.map(([icon, label]) => (
                         <View key={label} style={styles.point}>
                             <View style={styles.pointIcon}>
-                                <Feather name={icon} size={14} color={colors.jadeGlow} />
+                                <Feather name={icon} size={14} color={colors.jade} />
                             </View>
                             <Text style={styles.pointText}>{label}</Text>
                         </View>
@@ -167,12 +167,12 @@ const styles = StyleSheet.create({
     tagline: { fontFamily: fonts.bold, fontSize: 9, letterSpacing: 1.6, color: colors.inkMuted },
     safe: { flex: 1, backgroundColor: colors.bg },
     hero: { paddingHorizontal: space(3), paddingBottom: space(6), overflow: 'hidden' },
-    glow: { position: 'absolute', width: 280, height: 280, borderRadius: 140, right: -110, top: -90, backgroundColor: colors.jadeGlow, opacity: 0.16 },
-    heroTitle: { fontFamily: fonts.display, fontSize: 26, lineHeight: 32, color: colors.white, marginTop: space(3), letterSpacing: -0.3 },
+    glow: { position: 'absolute', width: 280, height: 280, borderRadius: 140, right: -110, top: -90, backgroundColor: colors.jadeGlow, opacity: 0.12 },
+    heroTitle: { fontFamily: fonts.display, fontSize: 26, lineHeight: 32, color: colors.ink, marginTop: space(3), letterSpacing: -0.3 },
     points: { marginTop: space(2.5), gap: space(1.25) },
     point: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    pointIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(45,212,191,0.14)' },
-    pointText: { fontFamily: fonts.medium, fontSize: 14, color: 'rgba(255,255,255,0.86)' },
+    pointIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.paper, borderWidth: 1, borderColor: colors.line },
+    pointText: { fontFamily: fonts.medium, fontSize: 14, color: colors.inkSoft },
     body: { flex: 1, paddingHorizontal: space(2), marginTop: -space(3.5) },
     version: { textAlign: 'center', fontFamily: fonts.medium, fontSize: 11, color: colors.inkFaint, marginTop: space(2.5) },
     formCard: { padding: space(2.5), borderRadius: radius.xl },

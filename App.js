@@ -132,7 +132,7 @@ export default function App() {
     if (!session || session.mustChangePassword) {
         return (
             <SafeAreaProvider>
-                <StatusBar style="light" />
+                <StatusBar style="dark" />
                 {!session ? <SignIn /> : <ChangePassword />}
                 <ToastHost />
             </SafeAreaProvider>

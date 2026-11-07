@@ -39,6 +39,8 @@ export const colors = {
 export const gradients = {
     brand: [colors.jade, colors.jadeBright, colors.jadeLively],
     ink: [colors.inkSoft, colors.ink],
+    // Light hero (sign-in): jade mist fading into the page background.
+    mist: [colors.jadeMist, colors.bg],
     success: [colors.success, '#4ADE80'],
     warning: [colors.warning, '#FBBF24'],
     info: [colors.info, '#60A5FA'],

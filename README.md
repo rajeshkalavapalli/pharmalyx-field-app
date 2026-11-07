@@ -59,3 +59,9 @@
 
 - Visit screen: "Samples & gifts given" lists the samples and gifts in hand (balance > 0) with - / + steppers; what is given is saved with the visit and taken from the rep's stock (before, the phone always sent no items)
 - JS-only change: shipped as an OTA update
+
+
+### V 1.0.10
+
+- Sign-in: light hero (jade mist to page background, gradients.mist) with the dark-text logo, ink title and white point icons, instead of the dark navy hero; dark status bar icons on the sign-in and change-password screens
+- JS-only change: shipped as an OTA update
