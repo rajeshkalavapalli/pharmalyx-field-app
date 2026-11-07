@@ -19,6 +19,7 @@ import { stopTrail } from './src/location';
 import { PermissionsProvider, usePermissions } from './src/permissions';
 import { colors, fonts, gradients, shadow } from './src/theme';
 import { ToastHost } from './src/toast';
+import { CrashScreen, showLastCrash } from './src/crashLog';
 import SignIn from './src/screens/SignIn';
 import ChangePassword from './src/screens/ChangePassword';
 import Me from './src/screens/Me';
@@ -120,14 +121,16 @@ export default function App() {
 
     const ready = fontsLoaded && session !== undefined;
     useEffect(() => {
-        if (ready) SplashScreen.hideAsync().catch(() => {});
+        if (!ready) return;
+        SplashScreen.hideAsync().catch(() => {});
+        showLastCrash();
     }, [ready]);
 
     if (!ready) {
         return (
             // Same colour as the splash, in case it hides before the app is ready.
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.ink }}>
-                <ActivityIndicator color={colors.jadeGlow} />
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg }}>
+                <ActivityIndicator color={colors.jade} />
             </View>
         );
     }
@@ -149,6 +152,7 @@ export default function App() {
             {/* keyed by user + company so permissions reload after switching account */}
             <PermissionsProvider key={`${session.user?.UserId}-${session.user?.organisation?.OrganisationId || ''}`}>
                 <AttentionProvider>
+                <CrashScreen>
                 <NavigationContainer ref={navigationRef} theme={navTheme}>
                     <StatusBar style="dark" />
                     <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
@@ -158,6 +162,7 @@ export default function App() {
                         ))}
                     </Stack.Navigator>
                 </NavigationContainer>
+                </CrashScreen>
                 </AttentionProvider>
             </PermissionsProvider>
             <ToastHost />

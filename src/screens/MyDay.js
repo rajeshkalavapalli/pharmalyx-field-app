@@ -207,7 +207,9 @@ export default function MyDay({ navigation }) {
 
     // Record the work-hour location trail once consent is given and the day has started.
     useEffect(() => {
-        if (data?.consent?.accepted && data?.workDay && !trail) startTrail(data.rules.pingIntervalMinutes).then(setTrail);
+        if (data?.consent?.accepted && data?.workDay && !trail) startTrail(data.rules?.pingIntervalMinutes)
+                .then(setTrail)
+                .catch(() => setTrail('off'));
     }, [data, trail]);
 
     const accept = async () => {

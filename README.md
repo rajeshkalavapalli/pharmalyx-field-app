@@ -109,3 +109,11 @@
 - Visit screen: record a voice note instead of typing (expo-audio); it uploads after the visit is saved, so a failed upload never loses the visit
 - Microphone permission no longer blocked (image-picker had microphonePermission false); light splash background
 - NEW NATIVE MODULES: app version 1.3.0 (new runtime) - needs a new APK (npm run build:apk); OTA updates for 1.2.0 phones stop here
+
+
+### V 1.0.17
+
+- Crash catcher: an error that closes the app is kept on the phone and shown on the next start (screenshot it for support); a screen that breaks shows its error with Try again instead of closing the app
+- My Day: the location trail start can no longer throw an unhandled error
+- Loading screen uses the light background like the new splash
+- JS-only change: OTA update for app 1.3.0 (npm run update:preview)
