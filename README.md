@@ -88,3 +88,9 @@
 
 - Chemist Check screen (Sales menu): pick the chemist, mark each product on the shelf (✓) or missing (✕) with the last check shown, optional notes
 - JS-only change: shipped as an OTA update (Android)
+
+
+### V 1.0.14
+
+- Dashboard (managers / head office): Weekly brief card
+- JS-only change: shipped as an OTA update (Android)

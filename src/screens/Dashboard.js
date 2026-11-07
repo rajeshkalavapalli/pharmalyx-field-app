@@ -189,6 +189,28 @@ function WorkView({ data, navigation }) {
 }
 
 // Home: the same numbers as the web dashboard, with "My team" / "My work" for managers.
+const BRIEF_TONE = { info: colors.jade, success: colors.successDark, warning: colors.warningDark, error: colors.errorDark };
+
+// The week in a few lines for managers / head office (same as the web dashboard's Weekly brief).
+function WeeklyBrief() {
+    const state = useLoad(async () => (await api.get('/app/dashboard/brief')).data, [], '');
+    const brief = state.data;
+    if (!brief?.available || !brief.lines?.length) return null;
+    return (
+        <>
+            <SectionTitle title="Weekly brief" caption="What needs your attention this week" />
+            <Card style={{ marginBottom: space(2), gap: space(1.25) }}>
+                {brief.lines.map((line) => (
+                    <View key={line.text} style={{ flexDirection: 'row', gap: space(1), alignItems: 'flex-start' }}>
+                        <View style={[styles.briefDot, { backgroundColor: BRIEF_TONE[line.tone] || colors.jade }]} />
+                        <Text style={[text.body, { flex: 1 }]}>{line.text}</Text>
+                    </View>
+                ))}
+            </Card>
+        </>
+    );
+}
+
 export default function Dashboard({ navigation }) {
     const state = useLoad(async () => (await api.get('/app/dashboard')).data, [], "Couldn't load the dashboard.");
     const permissions = usePermissions();
@@ -221,6 +243,8 @@ export default function Dashboard({ navigation }) {
                 )}
             </LinearGradient>
 
+            {hasTeam ? <WeeklyBrief /> : null}
+
             {hasTeam && (
                 <Chips
                     options={[
@@ -241,6 +265,7 @@ export default function Dashboard({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    briefDot: { width: 8, height: 8, borderRadius: 4, marginTop: 6 },
     hero: { borderRadius: radius.xl, padding: space(2.25), marginBottom: space(2), borderWidth: 1, borderColor: colors.line },
     heroTitle: { fontFamily: fonts.display, fontSize: 24, lineHeight: 30, color: colors.ink, marginTop: 4 },
     heroMeta: { fontFamily: fonts.medium, fontSize: 12.5, color: colors.inkMuted, marginTop: 2 },
