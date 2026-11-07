@@ -53,3 +53,9 @@
 
 - Samples / gifts: Issue list comes from /app/stock/recipients (direct reports, or everyone for an admin) with the designation shown; the button shows for anyone who can issue
 - JS-only change: shipped as an OTA update
+
+
+### V 1.0.9
+
+- Visit screen: "Samples & gifts given" lists the samples and gifts in hand (balance > 0) with - / + steppers; what is given is saved with the visit and taken from the rep's stock (before, the phone always sent no items)
+- JS-only change: shipped as an OTA update

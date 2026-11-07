@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { checkIn, errorMessage, saveVisit } from '../api';
+import { api, checkIn, errorMessage, saveVisit } from '../api';
 import { getFix } from '../location';
 import { colors, fonts, radius, space, text } from '../theme';
 import { doctorName, titleCase } from '../format';
@@ -22,6 +22,49 @@ const uuid = () =>
         return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
     });
 
+// Samples and gifts in the rep's bag (balance > 0), to record what was given at this visit.
+function GivenItems({ given, setGiven }) {
+    const [items, setItems] = useState(null);
+
+    useEffect(() => {
+        Promise.all(['SAMPLE', 'GIFT'].map((type) => api.get('/app/stock/balances', { params: { itemType: type } }).then((r) => (r.data?.balances || []).map((b) => ({ ...b, ItemType: type })))))
+            .then((lists) => setItems(lists.flat().filter((b) => Number(b.Balance) > 0)))
+            .catch(() => setItems([]));
+    }, []);
+
+    if (!items) return null;
+    if (!items.length) return <Text style={[text.small, { marginBottom: space(2) }]}>No samples or gifts in hand. Your manager issues them.</Text>;
+
+    const key = (b) => `${b.ItemType}:${b.ItemId}`;
+    const change = (b, step) => setGiven((g) => {
+        const next = Math.max(0, Math.min(Number(b.Balance), (g[key(b)] || 0) + step));
+        return { ...g, [key(b)]: next };
+    });
+
+    return (
+        <Card style={{ marginBottom: space(2) }}>
+            {items.map((b) => {
+                const qty = given[key(b)] || 0;
+                return (
+                    <View key={key(b)} style={styles.itemRow}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.itemName} numberOfLines={1}>{b.ItemName}</Text>
+                            <Text style={text.small}>{b.ItemType === 'SAMPLE' ? 'Sample' : 'Gift'} · {b.Balance} in hand</Text>
+                        </View>
+                        <Pressable onPress={() => change(b, -1)} hitSlop={8} style={styles.stepBtn} accessibilityLabel={`Less ${b.ItemName}`}>
+                            <Feather name="minus" size={16} color={colors.inkSoft} />
+                        </Pressable>
+                        <Text style={styles.qty}>{qty}</Text>
+                        <Pressable onPress={() => change(b, 1)} hitSlop={8} style={styles.stepBtn} accessibilityLabel={`More ${b.ItemName}`}>
+                            <Feather name="plus" size={16} color={colors.jade} />
+                        </Pressable>
+                    </View>
+                );
+            })}
+        </Card>
+    );
+}
+
 // At the clinic: live check-in, stay timer, distance guidance, then save the visit.
 export default function Visit({ route, navigation }) {
     const { doctor, date } = route.params;
@@ -31,6 +74,7 @@ export default function Visit({ route, navigation }) {
     const [notes, setNotes] = useState('');
     const [saving, setSaving] = useState(false);
     const [result, setResult] = useState(null);
+    const [given, setGiven] = useState({}); // "SAMPLE:<id>" -> quantity
     const visitId = useRef(uuid()).current;
 
     const doCheckIn = async (retry = true) => {
@@ -75,7 +119,9 @@ export default function Visit({ route, navigation }) {
                 CheckInId: checkInState.status === 'done' ? checkInState.id : null,
                 RecordedOffline: false,
                 RecordedAt: new Date().toISOString(),
-                Items: [],
+                Items: Object.entries(given)
+                    .filter(([, qty]) => qty > 0)
+                    .map(([k, qty]) => ({ ItemType: k.split(':')[0], ItemId: k.split(':')[1], Quantity: qty })),
             });
             setResult(response?.data || response || {});
         } catch (err) {
@@ -155,6 +201,9 @@ export default function Visit({ route, navigation }) {
                 })}
             </View>
 
+            <Text style={[text.title, { marginBottom: space(1) }]}>Samples & gifts given</Text>
+            <GivenItems given={given} setGiven={setGiven} />
+
             <Field label="Notes (optional)" value={notes} onChangeText={(v) => setNotes(v.slice(0, 1000))} multiline placeholder="What was discussed, products, next step…" autoCapitalize="sentences" />
 
             <Button title={saving ? 'Saving…' : 'Save visit'} icon="check" onPress={save} busy={saving} disabled={checkInState.status === 'working'} />
@@ -170,5 +219,9 @@ const styles = StyleSheet.create({
     feedback: { flex: 1, alignItems: 'center', gap: 6, paddingVertical: space(1.5), borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.paper },
     feedbackOn: { backgroundColor: colors.jade, borderColor: colors.jade },
     feedbackText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.inkSoft },
+    itemRow: { flexDirection: 'row', alignItems: 'center', gap: space(1), paddingVertical: space(1) },
+    itemName: { fontFamily: fonts.semibold, fontSize: 14, color: colors.ink },
+    stepBtn: { width: 34, height: 34, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.paper },
+    qty: { minWidth: 26, textAlign: 'center', fontFamily: fonts.heavy, fontSize: 16, color: colors.ink },
     resultIcon: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
 });
