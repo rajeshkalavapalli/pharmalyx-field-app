@@ -43,6 +43,7 @@ export const SECTIONS = [
             { label: 'Add Doctor', icon: 'user-plus', screen: 'AddDoctor', permission: ['doctorrequests.create'] },
             { label: 'Verification', icon: 'shield', screen: 'DoctorRequests', params: { tab: 'verification' }, permission: ['doctorrequests.create', 'doctorrequests.approve'], badge: 'Verification' },
             { label: 'RCPA', icon: 'percent', screen: 'Rcpa', permission: ['rcpa.view'] },
+            { label: 'Chemist Check', icon: 'check-square', screen: 'ChemistCheck', permission: ['rcpa.view', 'rcpa.create'] },
             { label: 'Samples', icon: 'package', screen: 'Stock', params: { kind: 'SAMPLE' }, permission: ['stock.view'] },
             { label: 'Gifts', icon: 'gift', screen: 'Stock', params: { kind: 'GIFT' }, permission: ['stock.view'] },
             { label: 'Feedback', icon: 'message-circle', screen: 'Feedback', permission: ['feedback.view'] },

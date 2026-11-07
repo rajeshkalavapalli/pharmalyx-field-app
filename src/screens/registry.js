@@ -28,6 +28,7 @@ import DoctorSpend from './DoctorSpend';
 import Feedback from './Feedback';
 import JointWork from './JointWork';
 import Audits from './Audits';
+import ChemistCheck from './ChemistCheck';
 import FieldLedger from './FieldLedger';
 import Rcpa from './Rcpa';
 import Secondary from './Secondary';
@@ -90,6 +91,7 @@ export const STACK_SCREENS = {
     Feedback,
     JointWork,
     Audits,
+    ChemistCheck,
     FieldLedger,
     Rcpa,
     Secondary,
