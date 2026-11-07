@@ -41,6 +41,8 @@ export const gradients = {
     ink: [colors.inkSoft, colors.ink],
     // Light hero (sign-in): jade mist fading into the page background.
     mist: [colors.jadeMist, colors.bg],
+    // Light header cards inside the app: white into a hint of jade.
+    soft: [colors.paper, colors.jadeMist],
     success: [colors.success, '#4ADE80'],
     warning: [colors.warning, '#FBBF24'],
     info: [colors.info, '#60A5FA'],

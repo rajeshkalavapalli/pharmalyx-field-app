@@ -100,7 +100,7 @@ export default function Me({ navigation }) {
 
     return (
         <Screen refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.jade} />}>
-            <LinearGradient colors={gradients.ink} style={styles.profile}>
+            <LinearGradient colors={gradients.soft} style={styles.profile}>
                 <LinearGradient colors={gradients.brand} style={styles.avatar}>
                     <Text style={styles.avatarText}>{String(name || '?').trim().charAt(0).toUpperCase()}</Text>
                 </LinearGradient>
@@ -187,11 +187,11 @@ export default function Me({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    profile: { flexDirection: 'row', alignItems: 'center', gap: space(1.5), padding: space(2), borderRadius: radius.xl, marginBottom: space(1) },
+    profile: { flexDirection: 'row', alignItems: 'center', gap: space(1.5), padding: space(2), borderRadius: radius.xl, marginBottom: space(1), borderWidth: 1, borderColor: colors.line },
     avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
     avatarText: { fontFamily: fonts.heavy, fontSize: 20, color: colors.white },
-    name: { fontFamily: fonts.display, fontSize: 21, color: colors.white },
-    meta: { fontFamily: fonts.medium, fontSize: 12.5, color: 'rgba(255,255,255,0.72)', marginTop: 2 },
+    name: { fontFamily: fonts.display, fontSize: 21, color: colors.ink },
+    meta: { fontFamily: fonts.medium, fontSize: 12.5, color: colors.inkMuted, marginTop: 2 },
     times: { flexDirection: 'row', gap: space(2) },
     stats: { flexDirection: 'row', gap: space(1.5), marginBottom: space(1) },
     balances: { flexDirection: 'row', flexWrap: 'wrap', gap: space(1.25), marginBottom: space(1.5) },

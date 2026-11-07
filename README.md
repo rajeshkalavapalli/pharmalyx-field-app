@@ -65,3 +65,9 @@
 
 - Sign-in: light hero (jade mist to page background, gradients.mist) with the dark-text logo, ink title and white point icons, instead of the dark navy hero; dark status bar icons on the sign-in and change-password screens
 - JS-only change: shipped as an OTA update
+
+
+### V 1.0.11
+
+- Light header cards (gradients.soft: white into jade mist, thin border, ink text) instead of dark navy on Home (welcome card), Today (DA status card) and Me (profile card)
+- JS-only change: shipped as an OTA update

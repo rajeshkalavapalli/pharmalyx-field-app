@@ -108,10 +108,10 @@ function DayStatus({ data, trail, loadedAt, busy, onAccept, onStart }) {
 
     const t = TRAIL[trail];
     return (
-        <LinearGradient colors={gradients.ink} style={styles.statusDark}>
+        <LinearGradient colors={gradients.soft} style={styles.statusDark}>
             <View style={styles.statusTop}>
                 <View style={{ flex: 1 }}>
-                    <Text style={[text.overline, { color: colors.jadeGlow }]}>{earned ? "Today's DA" : 'Next step'}</Text>
+                    <Text style={text.overline}>{earned ? "Today's DA" : 'Next step'}</Text>
                     <Text style={styles.statusTitle}>{earned ? 'DA earned for today' : `Visit ${plural(needs - counted, 'more doctor')} for today's DA`}</Text>
                 </View>
                 <View style={styles.countBubble}>
@@ -125,16 +125,16 @@ function DayStatus({ data, trail, loadedAt, busy, onAccept, onStart }) {
             </Text>
             <View style={styles.divider} />
             <View style={styles.metaRow}>
-                <Feather name="map" size={13} color="rgba(255,255,255,0.7)" />
+                <Feather name="map" size={13} color={colors.inkMuted} />
                 <Text style={styles.metaText}>{patch}</Text>
             </View>
             <View style={styles.metaRow}>
-                <Feather name="clock" size={13} color="rgba(255,255,255,0.7)" />
+                <Feather name="clock" size={13} color={colors.inkMuted} />
                 <Text style={styles.metaText}>Started {clock(data.workDay.StartedAt)}</Text>
-                {t ? <Text style={[styles.metaText, { color: t.tone === 'error' ? '#FCA5A5' : colors.jadeGlow }]}>· {t.label}</Text> : null}
+                {t ? <Text style={[styles.metaText, { color: t.tone === 'error' ? colors.errorDark : colors.jade }]}>· {t.label}</Text> : null}
             </View>
             <View style={styles.metaRow}>
-                <Feather name="refresh-cw" size={13} color="rgba(255,255,255,0.7)" />
+                <Feather name="refresh-cw" size={13} color={colors.inkMuted} />
                 <Text style={styles.metaText}>Updated {ago(loadedAt)} · pull down to refresh</Text>
             </View>
         </LinearGradient>
@@ -347,16 +347,16 @@ const styles = StyleSheet.create({
     back: { width: 40, height: 40, borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.paper, alignItems: 'center', justifyContent: 'center', marginBottom: space(1.5) },
     status: { padding: space(2.25) },
     skeletonCard: { backgroundColor: colors.paper, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.line },
-    statusDark: { borderRadius: radius.xl, padding: space(2.25) },
+    statusDark: { borderRadius: radius.xl, padding: space(2.25), borderWidth: 1, borderColor: colors.line },
     statusTop: { flexDirection: 'row', alignItems: 'center', gap: space(1.5), marginBottom: space(1.75) },
-    statusTitle: { fontFamily: fonts.display, fontSize: 21, lineHeight: 27, color: colors.white, marginTop: 4 },
-    countBubble: { width: 66, height: 66, borderRadius: 33, borderWidth: 2, borderColor: 'rgba(45,212,191,0.55)', alignItems: 'center', justifyContent: 'center' },
-    countBig: { fontFamily: fonts.heavy, fontSize: 24, lineHeight: 26, color: colors.white },
-    countSmall: { fontFamily: fonts.semibold, fontSize: 11, color: 'rgba(255,255,255,0.7)' },
-    statusLine: { fontFamily: fonts.medium, fontSize: 13, lineHeight: 18, color: 'rgba(255,255,255,0.88)', marginTop: space(1.25) },
-    divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.12)', marginVertical: space(1.5) },
+    statusTitle: { fontFamily: fonts.display, fontSize: 21, lineHeight: 27, color: colors.ink, marginTop: 4 },
+    countBubble: { width: 66, height: 66, borderRadius: 33, borderWidth: 2, borderColor: colors.jade, alignItems: 'center', justifyContent: 'center' },
+    countBig: { fontFamily: fonts.heavy, fontSize: 24, lineHeight: 26, color: colors.ink },
+    countSmall: { fontFamily: fonts.semibold, fontSize: 11, color: colors.inkMuted },
+    statusLine: { fontFamily: fonts.medium, fontSize: 13, lineHeight: 18, color: colors.inkSoft, marginTop: space(1.25) },
+    divider: { height: 1, backgroundColor: colors.line, marginVertical: space(1.5) },
     metaRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 6 },
-    metaText: { fontFamily: fonts.medium, fontSize: 12, color: 'rgba(255,255,255,0.75)' },
+    metaText: { fontFamily: fonts.medium, fontSize: 12, color: colors.inkMuted },
     patch: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: space(1.25) },
     quickRow: { flexDirection: 'row', gap: space(1), marginTop: space(2) },
     quick: { flex: 1, alignItems: 'center', gap: 6, paddingVertical: space(1.5), borderRadius: radius.lg, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.paper },

@@ -200,8 +200,8 @@ export default function Dashboard({ navigation }) {
 
     return (
         <Screen refreshControl={state.refreshControl}>
-            <LinearGradient colors={gradients.ink} style={styles.hero}>
-                <Text style={[text.overline, { color: colors.jadeGlow }]}>Welcome back</Text>
+            <LinearGradient colors={gradients.soft} style={styles.hero}>
+                <Text style={text.overline}>Welcome back</Text>
                 <Text style={styles.heroTitle}>
                     {greeting()}, {name.split(' ')[0]}
                 </Text>
@@ -241,10 +241,10 @@ export default function Dashboard({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    hero: { borderRadius: radius.xl, padding: space(2.25), marginBottom: space(2) },
-    heroTitle: { fontFamily: fonts.display, fontSize: 24, lineHeight: 30, color: colors.white, marginTop: 4 },
-    heroMeta: { fontFamily: fonts.medium, fontSize: 12.5, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
-    heroLine: { fontFamily: fonts.semibold, fontSize: 13, color: colors.jadeGlow, marginTop: space(1.25) },
+    hero: { borderRadius: radius.xl, padding: space(2.25), marginBottom: space(2), borderWidth: 1, borderColor: colors.line },
+    heroTitle: { fontFamily: fonts.display, fontSize: 24, lineHeight: 30, color: colors.ink, marginTop: 4 },
+    heroMeta: { fontFamily: fonts.medium, fontSize: 12.5, color: colors.inkMuted, marginTop: 2 },
+    heroLine: { fontFamily: fonts.semibold, fontSize: 13, color: colors.jade, marginTop: space(1.25) },
     member: { flexDirection: 'row', alignItems: 'center', gap: space(1.5), paddingHorizontal: space(1.75), paddingVertical: space(1.4) },
     rowLine: { borderTopWidth: 1, borderTopColor: colors.lineSoft },
     avatar: { width: 38, height: 38, borderRadius: 19, backgroundColor: colors.jadeMist, alignItems: 'center', justifyContent: 'center' },
