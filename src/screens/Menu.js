@@ -12,10 +12,11 @@ import { usePermissions } from '../permissions';
 import { colors, fonts, gradients, radius, shadow, space, text, tileTones } from '../theme';
 import { Empty, Screen, Skeleton } from '../ui';
 import { BUILT } from './registry';
+import { t } from '../i18n';
 
 const MAX_TILES = 8; // more than this: 7 tiles + "More"
 
-const open = (navigation, item) => navigation.navigate(item.screen, { ...(item.params || {}), title: item.label });
+const open = (navigation, item) => navigation.navigate(item.screen, { ...(item.params || {}), title: t(item.label) });
 
 // One rounded icon tile with its label (max 2 lines) and an optional count badge.
 export function Tile({ icon, label, tone = 'teal', badge, onPress }) {
@@ -44,7 +45,7 @@ export function SectionGrid({ section, badges, navigation, limit = MAX_TILES }) 
     return (
         <View style={styles.section}>
             <View style={styles.sectionHead}>
-                <Text style={styles.sectionTitle}>{section.title}</Text>
+                <Text style={styles.sectionTitle}>{t(section.title)}</Text>
                 {overflow ? (
                     <Pressable onPress={() => navigation.navigate('MenuSection', { title: section.title })} hitSlop={10} style={styles.seeAll} accessibilityRole="button">
                         <Text style={styles.seeAllText}>See all</Text>
@@ -54,9 +55,9 @@ export function SectionGrid({ section, badges, navigation, limit = MAX_TILES }) 
             </View>
             <View style={styles.grid}>
                 {items.map((item) => (
-                    <Tile key={`${item.screen}-${item.label}`} icon={item.icon} label={item.label} tone={section.tone} badge={item.badge ? badges[item.badge] : 0} onPress={() => open(navigation, item)} />
+                    <Tile key={`${item.screen}-${item.label}`} icon={item.icon} label={t(item.label)} tone={section.tone} badge={item.badge ? badges[item.badge] : 0} onPress={() => open(navigation, item)} />
                 ))}
-                {overflow ? <Tile icon="grid" label="More" tone={section.tone} onPress={() => navigation.navigate('MenuSection', { title: section.title })} /> : null}
+                {overflow ? <Tile icon="grid" label={t("More")} tone={section.tone} onPress={() => navigation.navigate('MenuSection', { title: section.title })} /> : null}
             </View>
         </View>
     );
@@ -192,7 +193,7 @@ export default function Menu({ navigation }) {
                         <Text style={[styles.sectionTitle, { marginBottom: space(1.75) }]}>{`${results.length} result${results.length === 1 ? '' : 's'}`}</Text>
                         <View style={styles.grid}>
                             {results.map((item) => (
-                                <Tile key={`${item.screen}-${item.label}`} icon={item.icon} label={item.label} tone={item.tone} badge={item.badge ? attention.badges[item.badge] : 0} onPress={() => open(navigation, item)} />
+                                <Tile key={`${item.screen}-${item.label}`} icon={item.icon} label={t(item.label)} tone={item.tone} badge={item.badge ? attention.badges[item.badge] : 0} onPress={() => open(navigation, item)} />
                             ))}
                         </View>
                     </View>

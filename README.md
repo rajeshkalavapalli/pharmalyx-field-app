@@ -94,3 +94,10 @@
 
 - Dashboard (managers / head office): Weekly brief card
 - JS-only change: shipped as an OTA update (Android)
+
+
+### V 1.0.15
+
+- Telugu language (src/i18n.js): Me > Language switches English / తెలుగు (saved on the phone, the app reloads); English text is the key, so anything not yet translated stays English
+- Translated so far: tabs, Home menu sections and tiles, My Day, Visit, Me (score, attendance, language), Chemist Check
+- JS-only change: shipped as an OTA update (Android)

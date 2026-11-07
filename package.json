@@ -1,6 +1,6 @@
 {
   "name": "pharmalyx-field-app",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "main": "index.js",
   "dependencies": {
     "@expo-google-fonts/fraunces": "^0.4.1",

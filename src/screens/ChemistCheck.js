@@ -7,6 +7,7 @@ import { titleCase } from '../format';
 import { toast } from '../toast';
 import { colors, fonts, radius, space, text } from '../theme';
 import { Button, Card, Empty, Field, Header, Notice, Screen, Select } from '../ui';
+import { t } from '../i18n';
 
 // At a chemist: is each of our products on the shelf? Missing products reach the manager as an alert.
 export default function ChemistCheck({ navigation }) {
@@ -55,9 +56,9 @@ export default function ChemistCheck({ navigation }) {
 
     return (
         <Screen>
-            <Header overline="At the chemist" title="Product availability" onBack={() => navigation.goBack()} />
+            <Header overline="At the chemist" title={t("Product availability")} onBack={() => navigation.goBack()} />
             <Select
-                label="Chemist"
+                label={t("Chemist")}
                 value={chemist}
                 options={pharmacies.map((p) => ({ value: p.PharmacyId, label: titleCase(p.PharmacyName), detail: titleCase(p.AreaName) }))}
                 onChange={chooseChemist}
@@ -89,7 +90,7 @@ export default function ChemistCheck({ navigation }) {
                             );
                         })}
                     </Card>
-                    <Field label="Notes (optional)" value={notes} onChangeText={(v) => setNotes(v.slice(0, 300))} multiline autoCapitalize="sentences" placeholder="e.g. stockist supply late, competitor scheme" />
+                    <Field label={t("Notes (optional)")} value={notes} onChangeText={(v) => setNotes(v.slice(0, 300))} multiline autoCapitalize="sentences" placeholder="e.g. stockist supply late, competitor scheme" />
                     <Button title={marked.length ? `Save ${marked.length} product(s)` : 'Mark products to save'} icon="check" onPress={save} busy={busy} disabled={!marked.length} />
                 </>
             )}

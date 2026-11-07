@@ -10,6 +10,7 @@ import { getFix, startTrail } from '../location';
 import { colors, fonts, gradients, radius, space, text } from '../theme';
 import { toast } from '../toast';
 import { Button, Card, Chips, Empty, ErrorState, Notice, ProgressBar, Screen, SectionTitle, Skeleton, SkeletonList, Tag } from '../ui';
+import { t } from '../i18n';
 
 export const RESULT = {
     VALID: { label: 'Counted', tone: 'success' },
@@ -46,10 +47,10 @@ function DoctorRow({ doctor, onCheckIn }) {
                     {doctor.Category ? <Tag label={`Class ${doctor.Category}`} tone="primary" /> : null}
                     <Tag label={`${plural(doctor.remaining, 'visit')} left`} tone="neutral" />
                     {doctor.timing?.slot ? <Tag label={doctor.timing.label} tone="info" icon="clock" /> : null}
-                    {!doctor.clinicPinned ? <Tag label="Clinic not pinned" tone="warning" icon="map-pin" /> : null}
+                    {!doctor.clinicPinned ? <Tag label={t("Clinic not pinned")} tone="warning" icon="map-pin" /> : null}
                 </View>
             </View>
-            <Button title="Check in" small icon="map-pin" onPress={() => onCheckIn(doctor)} />
+            <Button title={t("Check in")} small icon="map-pin" onPress={() => onCheckIn(doctor)} />
         </Card>
     );
 }
@@ -105,7 +106,7 @@ function DayStatus({ data, trail, loadedAt, busy, onAccept, onStart }) {
                     Recorded only {data.rules.workStartHour}:00–{data.rules.workEndHour}:00 after you start your day. It proves your field work and works out your TA from the
                     distance you travel.
                 </Text>
-                <Button title="I agree" icon="check" onPress={onAccept} busy={busy} />
+                <Button title={t("I agree")} icon="check" onPress={onAccept} busy={busy} />
             </Card>
         );
     }
@@ -113,14 +114,14 @@ function DayStatus({ data, trail, loadedAt, busy, onAccept, onStart }) {
     if (!data.workDay) {
         return (
             <Card style={styles.status}>
-                <Text style={text.overline}>Next step</Text>
+                <Text style={text.overline}>{t("Next step")}</Text>
                 <Text style={[text.title, { marginTop: 4 }]}>Start your day</Text>
                 <Text style={[text.body, { marginTop: 6 }]}>It also checks you in for attendance and turns on the location trail for TA.</Text>
                 <View style={styles.patch}>
                     <Feather name="map" size={14} color={colors.inkMuted} />
                     <Text style={text.small}>{patch}</Text>
                 </View>
-                <Button title="Start my day" icon="play" onPress={onStart} busy={busy} style={{ marginTop: space(1.5) }} />
+                <Button title={t("Start my day")} icon="play" onPress={onStart} busy={busy} style={{ marginTop: space(1.5) }} />
             </Card>
         );
     }
@@ -130,8 +131,8 @@ function DayStatus({ data, trail, loadedAt, busy, onAccept, onStart }) {
         <LinearGradient colors={gradients.soft} style={styles.statusDark}>
             <View style={styles.statusTop}>
                 <View style={{ flex: 1 }}>
-                    <Text style={text.overline}>{earned ? "Today's DA" : 'Next step'}</Text>
-                    <Text style={styles.statusTitle}>{earned ? 'DA earned for today' : `Visit ${plural(needs - counted, 'more doctor')} for today's DA`}</Text>
+                    <Text style={text.overline}>{earned ? t("Today's DA") : t("Next step")}</Text>
+                    <Text style={styles.statusTitle}>{earned ? t("DA earned for today") : `Visit ${plural(needs - counted, 'more doctor')} for today's DA`}</Text>
                 </View>
                 <View style={styles.countBubble}>
                     <Text style={styles.countBig}>{counted}</Text>
@@ -296,18 +297,18 @@ export default function MyDay({ navigation }) {
                     ))}
 
                     <View style={styles.quickRow}>
-                        <QuickAction icon="user-plus" label="Add doctor" onPress={() => navigation.navigate('AddDoctor')} />
-                        <QuickAction icon="shopping-bag" label="New order" onPress={() => navigation.navigate('NewOrder')} />
+                        <QuickAction icon="user-plus" label={t("Add doctor")} onPress={() => navigation.navigate('AddDoctor')} />
+                        <QuickAction icon="shopping-bag" label={t("New order")} onPress={() => navigation.navigate('NewOrder')} />
                         <QuickAction icon="credit-card" label="TA / DA" onPress={() => navigation.navigate('Allowance')} />
-                        <QuickAction icon="calendar" label="Leave" onPress={() => navigation.navigate('Me')} />
+                        <QuickAction icon="calendar" label={t("Leave")} onPress={() => navigation.navigate('Me')} />
                     </View>
 
-                    <SectionTitle title={data.planned?.areaName ? `Today's plan · ${titleCase(data.planned.areaName)}` : "Today's plan"} caption={here ? 'Nearest clinic first, from where you are now.' : 'Ordered by when each doctor is usually available.'} />
+                    <SectionTitle title={data.planned?.areaName ? `${t("Today's plan")} · ${titleCase(data.planned.areaName)}` : t("Today's plan")} caption={here ? t("Nearest clinic first, from where you are now.") : t("Ordered by when each doctor is usually available.")} />
                     {data.plan.length + data.otherDue.length > 1 ? (
                         <Chips
                             options={[
-                                { value: 'time', label: 'Usual time' },
-                                { value: 'near', label: 'Nearest first' },
+                                { value: 'time', label: t("Usual time") },
+                                { value: 'near', label: t("Nearest first") },
                             ]}
                             value={here ? 'near' : 'time'}
                             onChange={(v) => ((v === 'near') !== Boolean(here) ? toggleNearest() : null)}
@@ -323,28 +324,28 @@ export default function MyDay({ navigation }) {
                         <Card>
                             <Empty
                                 icon="map"
-                                title={data.planned ? 'Nobody due in this patch today' : 'No tour plan for today'}
+                                title={data.planned ? t("Nobody due in this patch today") : t("No tour plan for today")}
                                 caption={data.otherDue.length ? `You can visit any of the ${plural(data.otherDue.length, 'doctor')} due below.` : 'Add a doctor you meet at a new clinic.'}
                             />
-                            {!data.otherDue.length && <Button title="Add a doctor" icon="user-plus" variant="outline" onPress={() => navigation.navigate('AddDoctor')} />}
+                            {!data.otherDue.length && <Button title={t("Add a doctor")} icon="user-plus" variant="outline" onPress={() => navigation.navigate('AddDoctor')} />}
                         </Card>
                     )}
 
                     {data.otherDue.length > 0 && (
                         <>
-                            <SectionTitle title="Also due in your territory" caption="No approval needed to visit them." />
+                            <SectionTitle title={t("Also due in your territory")} caption={t("No approval needed to visit them.")} />
                             <View style={{ gap: space(1.25) }}>
                                 {others.map((doctor) => (
                                     <DoctorRow key={doctor.DoctorId} doctor={doctor} onCheckIn={openVisit} />
                                 ))}
                             </View>
                             {data.otherDue.length > 8 && (
-                                <Button title={showAll ? 'Show fewer' : `Show all ${data.otherDue.length}`} variant="ghost" onPress={() => setShowAll((v) => !v)} style={{ marginTop: space(1) }} />
+                                <Button title={showAll ? t("Show fewer") : `Show all ${data.otherDue.length}`} variant="ghost" onPress={() => setShowAll((v) => !v)} style={{ marginTop: space(1) }} />
                             )}
                         </>
                     )}
 
-                    <SectionTitle title="Today's visits" caption="Counted, needs a look (still counts) or not counted." />
+                    <SectionTitle title={t("Today's visits")} caption="Counted, needs a look (still counts) or not counted." />
                     {data.visits.length ? (
                         <View style={{ gap: space(1) }}>
                             {data.visits.map((visit) => {
@@ -371,8 +372,8 @@ export default function MyDay({ navigation }) {
                         <Card>
                             <Empty
                                 icon="map-pin"
-                                title="No visits yet today"
-                                caption={started ? 'When you reach a clinic, tap Check in on the doctor above. Your check-in time and location are saved.' : 'Start your day first, then check in at each clinic.'}
+                                title={t("No visits yet today")}
+                                caption={started ? 'When you reach a clinic, tap Check in on the doctor above. Your check-in time and location are saved.' : t("Start your day first, then check in at each clinic.")}
                             />
                         </Card>
                     )}

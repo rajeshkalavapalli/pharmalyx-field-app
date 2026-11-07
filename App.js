@@ -12,6 +12,7 @@ import { useFonts, PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJa
 import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces';
 
 import { loadSession, onSessionChange } from './src/api';
+import { loadLanguage, t } from './src/i18n';
 import { navigationRef, usePush } from './src/push';
 import { AttentionProvider, useAttention } from './src/attention';
 import { stopTrail } from './src/location';
@@ -83,7 +84,7 @@ function Tabs() {
                         key={tab.name}
                         name={tab.name}
                         component={tab.component}
-                        options={{ tabBarIcon: ({ color, size }) => <Feather name={tab.icon} size={size - 2} color={color} />, tabBarBadge: tab.badge ? (tab.badge > 9 ? '9+' : tab.badge) : undefined }}
+                        options={{ tabBarLabel: t(tab.name), tabBarIcon: ({ color, size }) => <Feather name={tab.icon} size={size - 2} color={color} />, tabBarBadge: tab.badge ? (tab.badge > 9 ? '9+' : tab.badge) : undefined }}
                     />
                 )
             )}
@@ -106,7 +107,11 @@ export default function App() {
     usePush(Boolean(session && !session.mustChangePassword));
 
     useEffect(() => {
-        loadSession().then(setSession);
+        // The saved language first, so the first screen already shows in it.
+        loadLanguage()
+            .catch(() => null)
+            .then(() => loadSession())
+            .then(setSession);
         return onSessionChange((next) => {
             setSession(next);
             if (!next) stopTrail(); // signed out: stop recording location

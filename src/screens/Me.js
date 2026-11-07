@@ -9,7 +9,8 @@ import { getFix } from '../location';
 import { colors, fonts, gradients, radius, space, text } from '../theme';
 import { titleCase } from '../format';
 import { toast } from '../toast';
-import { Button, Card, Notice, ProgressBar, Screen, SectionTitle, Skeleton, StatTile, Tag } from '../ui';
+import { Button, Card, Chips, Notice, ProgressBar, Screen, SectionTitle, Skeleton, StatTile, Tag } from '../ui';
+import { LANGUAGES, language, setLanguage, t } from '../i18n';
 
 const LEAVE_STATUS = {
     PENDING: { label: 'Pending', tone: 'warning' },
@@ -39,7 +40,7 @@ function MyScore() {
     const band = SCORE_BAND[s.band] || SCORE_BAND.NO_DATA;
     return (
         <>
-            <SectionTitle title="My Field Truth Score" caption={data.learningMode ? 'Learning mode: for coaching only' : 'This month'} />
+            <SectionTitle title={t("My Field Truth Score")} caption={data.learningMode ? 'Learning mode: for coaching only' : t("This month")} />
             <Card style={{ marginBottom: space(1.5) }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: space(1.5) }}>
                     <View style={styles.scoreBubble}>
@@ -160,9 +161,12 @@ export default function Me({ navigation }) {
 
             <MyScore />
 
+            <SectionTitle title={t('Language')} caption="English / తెలుగు" />
+            <Chips options={LANGUAGES} value={language()} onChange={(v) => (v !== language() ? setLanguage(v) : null)} />
+
             {error ? <Notice tone="error">{error}</Notice> : null}
 
-            <SectionTitle title="Attendance today" />
+            <SectionTitle title={t("Attendance today")} />
             <Card style={{ marginBottom: space(1.5) }}>
                 {!today ? (
                     <View style={{ gap: 8 }}>
@@ -196,7 +200,7 @@ export default function Me({ navigation }) {
                 </View>
             )}
 
-            <SectionTitle title="Leave" caption={leave ? `Balances for ${leave.year}. Sundays are not counted.` : undefined} />
+            <SectionTitle title={t("Leave")} caption={leave ? `Balances for ${leave.year}. Sundays are not counted.` : undefined} />
             {leave?.balances?.length ? (
                 <View style={styles.balances}>
                     {leave.balances.map((b) => (
@@ -230,7 +234,7 @@ export default function Me({ navigation }) {
                 </View>
             )}
 
-            <Button title="Sign out" icon="log-out" variant="danger" onPress={signOut} style={{ marginTop: space(4) }} />
+            <Button title={t("Sign out")} icon="log-out" variant="danger" onPress={signOut} style={{ marginTop: space(4) }} />
             <Text style={[text.small, { textAlign: 'center', marginTop: space(1.5) }]}>Pharmalyx field app · managers and admin use the web app</Text>
         </Screen>
     );

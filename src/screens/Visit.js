@@ -9,11 +9,12 @@ import { colors, fonts, radius, space, text } from '../theme';
 import { doctorName, titleCase } from '../format';
 import { Button, Card, Field, Header, Notice, Screen, Tag } from '../ui';
 import { RESULT } from './MyDay';
+import { t } from '../i18n';
 
 const FEEDBACK = [
-    { value: 'POSITIVE', label: 'Positive', icon: 'thumbs-up' },
-    { value: 'NEUTRAL', label: 'Neutral', icon: 'minus-circle' },
-    { value: 'NEGATIVE', label: 'Negative', icon: 'thumbs-down' },
+    { value: 'POSITIVE', label: t("Positive"), icon: 'thumbs-up' },
+    { value: 'NEUTRAL', label: t("Neutral"), icon: 'minus-circle' },
+    { value: 'NEGATIVE', label: t("Negative"), icon: 'thumbs-down' },
 ];
 
 const mmss = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
@@ -180,7 +181,7 @@ export default function Visit({ route, navigation }) {
                     <View style={[styles.resultIcon, { backgroundColor: result.validity === 'INVALID' ? colors.errorSoft : colors.successSoft }]}>
                         <Feather name={result.validity === 'INVALID' ? 'alert-octagon' : 'check'} size={30} color={result.validity === 'INVALID' ? colors.errorDark : colors.successDark} />
                     </View>
-                    <Text style={[text.display, { marginTop: space(2), textAlign: 'center' }]}>Visit saved</Text>
+                    <Text style={[text.display, { marginTop: space(2), textAlign: 'center' }]}>{t("Visit saved")}</Text>
                     <Text style={[text.body, { textAlign: 'center', marginTop: 4 }]}>{doctorName(doctor.DoctorName)}</Text>
                     {r ? <View style={{ marginTop: space(1.5) }}><Tag label={r.label} tone={r.tone} /></View> : null}
                     {(result.reasons || []).map((reason) => (
@@ -192,7 +193,7 @@ export default function Visit({ route, navigation }) {
                         <Text style={[text.small, { marginTop: space(1.5), textAlign: 'center' }]}>If it was a genuine visit, you can explain it within 2 days.</Text>
                     ) : null}
                 </Card>
-                <Button title="Back to My Day" icon="arrow-left" onPress={() => navigation.goBack()} style={{ marginTop: space(2) }} />
+                <Button title={t("Back to My Day")} icon="arrow-left" onPress={() => navigation.goBack()} style={{ marginTop: space(2) }} />
             </Screen>
         );
     }
@@ -202,17 +203,17 @@ export default function Visit({ route, navigation }) {
             <Header overline="Visit" title={doctorName(doctor.DoctorName)} onBack={() => navigation.goBack()} />
             <Text style={[text.small, { marginTop: -space(1.5), marginBottom: space(2) }]}>{[titleCase(doctor.Speciality), titleCase(doctor.AreaName), titleCase(doctor.HospitalName)].filter(Boolean).join(' · ')}</Text>
 
-            {checkInState.status === 'working' && <Notice tone="info" icon="crosshair">Checking you in at the clinic…</Notice>}
+            {checkInState.status === 'working' && <Notice tone="info" icon="crosshair">{t("Checking you in at the clinic…")}</Notice>}
             {checkInState.status === 'failed' && (
                 <>
                     <Notice tone="error">{checkInState.message}</Notice>
-                    <Button title="Try again" variant="outline" icon="refresh-cw" onPress={() => doCheckIn()} style={{ marginBottom: space(2) }} />
+                    <Button title={t("Try again")} variant="outline" icon="refresh-cw" onPress={() => doCheckIn()} style={{ marginBottom: space(2) }} />
                 </>
             )}
 
             {checkInState.status === 'done' && (
                 <Card style={styles.timerCard}>
-                    <Text style={text.small}>At the clinic for</Text>
+                    <Text style={text.small}>{t("At the clinic for")}</Text>
                     <Text style={styles.timer}>{mmss(stayed)}</Text>
                     <Text style={[text.small, { color: left ? colors.inkMuted : colors.successDark }]}>
                         {left ? `Stay ${mmss(left)} more so this visit counts in full` : "You’ve stayed long enough. Save when you finish."}
@@ -231,7 +232,7 @@ export default function Visit({ route, navigation }) {
 
             {last ? (
                 <Button
-                    title={`Same as last visit · ${new Date(`${last.date}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
+                    title={`${t('Same as last visit')} · ${new Date(`${last.date}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
                     icon="copy"
                     variant="outline"
                     small
@@ -240,7 +241,7 @@ export default function Visit({ route, navigation }) {
                 />
             ) : null}
 
-            <Text style={[text.title, { marginTop: space(1) }]}>How did it go?</Text>
+            <Text style={[text.title, { marginTop: space(1) }]}>{t("How did it go?")}</Text>
             <View style={styles.feedbackRow}>
                 {FEEDBACK.map((item) => {
                     const on = feedback === item.value;
@@ -253,12 +254,12 @@ export default function Visit({ route, navigation }) {
                 })}
             </View>
 
-            <Text style={[text.title, { marginBottom: space(1) }]}>Samples & gifts given</Text>
+            <Text style={[text.title, { marginBottom: space(1) }]}>{t("Samples & gifts given")}</Text>
             <GivenItems given={given} setGiven={setGiven} prefill={prefill} />
 
-            <Field label="Notes (optional)" value={notes} onChangeText={(v) => setNotes(v.slice(0, 1000))} multiline placeholder="What was discussed, products, next step…" autoCapitalize="sentences" />
+            <Field label={t("Notes (optional)")} value={notes} onChangeText={(v) => setNotes(v.slice(0, 1000))} multiline placeholder="What was discussed, products, next step…" autoCapitalize="sentences" />
 
-            <Button title={saving ? 'Saving…' : 'Save visit'} icon="check" onPress={save} busy={saving} disabled={checkInState.status === 'working'} />
+            <Button title={saving ? t("Saving…") : t("Save visit")} icon="check" onPress={save} busy={saving} disabled={checkInState.status === 'working'} />
             {checkInState.status === 'failed' ? <Text style={[text.small, { marginTop: space(1) }]}>Saving without a check-in is allowed, but the visit won’t count.</Text> : null}
         </Screen>
     );
